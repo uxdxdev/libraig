@@ -128,8 +128,8 @@ void Raig::update()
 // Wrapper for libsocket Connection() that creates a peer connection based on the
 int Raig::RaigImpl::InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */)
 {
-	iSocketFileDescriptor = Connection(hostname, service, type, protocol);
-	return iSocketFileDescriptor;
+	m_iSocketFileDescriptor = Connection(hostname, service, type, protocol);
+	return m_iSocketFileDescriptor;
 }
 
 // Receive messages from the server using libsocket TODO: create wrapper in libsocket for revfrom()
@@ -197,13 +197,13 @@ int Raig::RaigImpl::AcceptConnection(int iListenSocketFileDescriptor, struct Add
 void Raig::RaigImpl::sendData(Packet* packet)
 {
 	printf("sendData()\n");
-	Write(iSocketFileDescriptor, packet, sizeof(Packet));
+	Write(m_iSocketFileDescriptor, packet, sizeof(Packet));
 	printf("sendData() OK\n");
 }
 
 Packet* Raig::RaigImpl::readData()
 {
-	Read(iSocketFileDescriptor, &readPacket, sizeof(Packet));
+	Read(m_iSocketFileDescriptor, &readPacket, sizeof(Packet));
 	return &readPacket;
 }
 
@@ -215,5 +215,5 @@ void Raig::RaigImpl::update()
 void Raig::RaigImpl::cleanUp()
 {
 	std::cout << "Raig::RaigImpl::cleanUp()" << std::endl;
-	close(iSocketFileDescriptor);
+	close(m_iSocketFileDescriptor);
 }
