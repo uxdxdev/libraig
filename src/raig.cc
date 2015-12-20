@@ -71,28 +71,46 @@ Raig::~Raig()
 
 // Libsocket wrapper functions to abstract the library and reduce coupling
 // Wrapper for libsocket Connection() that creates a peer connection based on the
-int Raig::InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */);
+int Raig::InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */)
+{
+	m_Impl->InitConnection(hostname, service, type, protocol);
+}
 
 // Receive messages from the server using libsocket TODO: create wrapper in libsocket for revfrom()
-int Raig::SendMessage(int socketFileDescriptor, char* buffer, size_t size, int flags);
+int Raig::SendMessage(int socketFileDescriptor, char* buffer, size_t size, int flags)
+{
+	m_Impl->SendMessage(socketFileDescriptor, buffer, size, flags);
+}
 
 // Receive data from the connected server using recvfrom()
-int Raig::ReceiveMessage(int iListenSocketFileDescriptor, char* buffer, int bufferSize, int flags, struct sockaddr *sender, socklen_t *sendsize);
+int Raig::ReceiveMessage(int iListenSocketFileDescriptor, char* buffer, int bufferSize, int flags, struct sockaddr *sender, socklen_t *sendsize)
+{
+	m_Impl->ReceiveMessage(iListenSocketFileDescriptor, buffer, bufferSize, flags, sender, sendsize);
+}
 
 // Set the server to listen mode for incoming TCP client connections
 // This wrapper function calls Listen() in libsocket
-void Raig::ListenForConnections(int socketFileDescriptor, int maxListenQSize);
+void Raig::ListenForConnections(int socketFileDescriptor, int maxListenQSize)
+{
+	m_Impl->ListenForConnections(socketFileDescriptor, maxListenQSize);
+}
 
 // Set up signal handler when forking processes on the server
 // Fork() will signal the parent process when it has been terminated.
 // Signal() in libsocket will create a signal handler for
 // catching terminated processes and releasing resources
 // used by them. This will prevent zombie processes.
-void Raig::CreateSignalHandler();
+void Raig::CreateSignalHandler()
+{
+	m_Impl->CreateSignalHandler();
+}
 
 // Accept all incoming TCP connections and return a file descriptor
 // used to communicate with the client.
-int Raig::AcceptConnection(int iListenSocketFileDescriptor, struct Address *address);
+int Raig::AcceptConnection(int iListenSocketFileDescriptor, struct Address *address)
+{
+	m_Impl->AcceptConnection(iListenSocketFileDescriptor, address);
+}
 
 void Raig::connect(char* ipAddress)
 {
