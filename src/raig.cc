@@ -183,7 +183,7 @@ void Raig::RaigImpl::CreateSignalHandler()
 	// Signal() in libsocket will create a signal handler for
 	// catching terminated processes and releasing resources
 	// used by them. This will prevent zombie processes.
-	Signal(SIGCHLD, SignalHandler);
+	Signal(SIGCHLD, (void*)SignalHandler);
 }
 
 // Accept all incoming TCP connections and return a file descriptor
