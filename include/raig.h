@@ -8,9 +8,6 @@ extern "C" {
 	#include "../external/libsocket/include/socket.h"
 }
 
-#define LINESIZE 80
-#define HANGMAN_TCP_PORT 1071
-
 namespace raig{
 
 struct Packet
@@ -34,7 +31,7 @@ public:
 	int SendMessage(int socketFileDescriptor, char* buffer, size_t size, int flags);
 
 	// Receive data from the connected server using recvfrom()
-	int ReceiveMessage(int iListenSocketFileDescriptor, char* buffer, int bufferSize, int flags, struct sockaddr *sender, socklen_t *sendsize);
+	int ReceiveMessage(int socketFileDescriptor, char* buffer, int bufferSize, int flags, struct sockaddr *sender, socklen_t *sendsize);
 
 	// Set the server to listen mode for incoming TCP client connections
 	// This wrapper function calls Listen() in libsocket
@@ -49,14 +46,14 @@ public:
 
 	// Accept all incoming TCP connections and return a file descriptor
 	// used to communicate with the client.
-	int AcceptConnection(int iListenSocketFileDescriptor, struct Address *address);
+	int AcceptConnection(int listenSocketFileDescriptor, struct Address *address);
 
-	void connect(char* ipAddress);
-	void sendData(char* dataString);
-	void sendData(int value);
 	void sendData(struct Packet* packet);
+
 	Packet* readData();
+
 	void update();
+
 private:
 	class RaigImpl; // Forward declaration
 	std::unique_ptr<RaigImpl> m_Impl; // Raig implementation using auto_ptr
