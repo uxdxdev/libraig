@@ -230,7 +230,9 @@ void Raig::RaigImpl::sendData(int value)
 
 void Raig::RaigImpl::sendData(Packet* packet)
 {
+	printf("sendData()\n");
 	Write(iSocketFileDescriptor, packet, sizeof(Packet));
+	printf("sendData() OK\n");
 }
 
 Packet* Raig::RaigImpl::readData()
