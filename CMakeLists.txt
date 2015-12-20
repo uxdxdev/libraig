@@ -10,10 +10,6 @@ ExternalProject_Add(libsocket
     SOURCE_DIR ${CMAKE_BINARY_DIR}/external/libsocket
 )
 
-if(CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-endif()
-
 set(SOURCES src/raig.cc)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
