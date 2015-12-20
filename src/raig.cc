@@ -70,7 +70,7 @@ Raig::~Raig()
 // Wrapper for libsocket Connection() that creates a peer connection based on the
 int Raig::InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */)
 {
-	m_Impl->InitConnection(hostname, service, type, protocol);
+	return m_Impl->InitConnection(hostname, service, type, protocol);
 }
 
 // Receive messages from the server using libsocket TODO: create wrapper in libsocket for revfrom()
@@ -106,7 +106,7 @@ void Raig::CreateSignalHandler()
 // used to communicate with the client.
 int Raig::AcceptConnection(int iListenSocketFileDescriptor, struct Address *address)
 {
-	m_Impl->AcceptConnection(iListenSocketFileDescriptor, address);
+	return m_Impl->AcceptConnection(iListenSocketFileDescriptor, address);
 }
 
 void Raig::connect(char* ipAddress)
