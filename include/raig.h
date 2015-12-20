@@ -4,6 +4,10 @@
 #include <memory>
 #include <iostream>
 
+extern "C" {
+	#include "../external/libsocket/include/socket.h"
+}
+
 #define LINESIZE 80
 #define HANGMAN_TCP_PORT 1071
 

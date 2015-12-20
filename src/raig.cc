@@ -1,8 +1,5 @@
 #include "../include/raig.h" // API for developers
 
-extern "C" {
-	#include "../external/libsocket/include/socket.h"
-}
 
 using namespace raig;
 
