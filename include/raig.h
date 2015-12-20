@@ -50,7 +50,7 @@ public:
 
 	void sendData(struct Packet* packet);
 
-	Packet* readData();
+	void readData(struct Packet* packet);
 
 	void update();
 

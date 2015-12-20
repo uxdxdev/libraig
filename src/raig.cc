@@ -32,9 +32,9 @@ public:
 	// used to communicate with the client.
 	int AcceptConnection(int listenSocketFileDescriptor, struct Address *address);
 
-	void sendData(Packet* packet);
+	void sendData(struct Packet* packet);
 
-	Packet* readData();
+	void readData(struct Packet* packet);
 
 	void update();
 
@@ -102,14 +102,14 @@ int Raig::AcceptConnection(int listenSocketFileDescriptor, struct Address *addre
 	return m_Impl->AcceptConnection(listenSocketFileDescriptor, address);
 }
 
-void Raig::sendData(Packet* packet)
+void Raig::sendData(struct Packet* packet)
 {
 	m_Impl->sendData(packet);
 }
 
-Packet* Raig::readData()
+void Raig::readData(struct Packet* packet)
 {
-	return (Packet*) m_Impl->readData();
+	m_Impl->readData(packet);
 }
 
 void Raig::update()
@@ -194,17 +194,16 @@ int Raig::RaigImpl::AcceptConnection(int iListenSocketFileDescriptor, struct Add
 	return connfd;
 }
 
-void Raig::RaigImpl::sendData(Packet* packet)
+void Raig::RaigImpl::sendData(struct Packet* packet)
 {
 	printf("sendData()\n");
 	Write(m_iSocketFileDescriptor, packet, sizeof(Packet));
 	printf("sendData() OK\n");
 }
 
-Packet* Raig::RaigImpl::readData()
+void Raig::RaigImpl::readData(struct Packet *packet)
 {
-	Read(m_iSocketFileDescriptor, &readPacket, sizeof(Packet));
-	return &readPacket;
+	Read(m_iSocketFileDescriptor, packet, sizeof(Packet));
 }
 
 void Raig::RaigImpl::update()
