@@ -33,21 +33,6 @@ public:
 	// Receive data from the connected server using recvfrom()
 	int ReceiveMessage(int socketFileDescriptor, char* buffer, int bufferSize, int flags, struct sockaddr *sender, socklen_t *sendsize);
 
-	// Set the server to listen mode for incoming TCP client connections
-	// This wrapper function calls Listen() in libsocket
-	void ListenForConnections(int socketFileDescriptor, int maxListenQSize);
-
-	// Set up signal handler when forking processes on the server
-	// Fork() will signal the parent process when it has been terminated.
-	// Signal() in libsocket will create a signal handler for
-	// catching terminated processes and releasing resources
-	// used by them. This will prevent zombie processes.
-	void CreateSignalHandler();
-
-	// Accept all incoming TCP connections and return a file descriptor
-	// used to communicate with the client.
-	int AcceptConnection(int listenSocketFileDescriptor, struct Address *address);
-
 	void sendData(struct Packet* packet);
 
 	void readData(struct Packet* packet);
