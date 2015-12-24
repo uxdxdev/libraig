@@ -157,7 +157,7 @@ int Raig::RaigImpl::sendBuffer()
 	int flags = 0;
 	int bytesSents = 0;
 
-	printf("Buffer: %s\n", m_cBuffer);
+	//printf("Buffer: %s\n", m_cBuffer);
 	bytesSents = Send(m_iSocketFileDescriptor, m_cBuffer, size, flags);
 
 	char *statusFlag = strtok((char*)m_cBuffer, "_");
