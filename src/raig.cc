@@ -159,6 +159,13 @@ int Raig::RaigImpl::sendBuffer()
 
 	bytesSents = Send(m_iSocketFileDescriptor, m_cBuffer, size, flags);
 
+	char *statusFlag = strtok((char*)m_cBuffer, "_");
+
+	if(strcmp(statusFlag, "path") == 0)
+	{
+		// Server is waiting for a request
+		sprintf(m_cBuffer, "idle_");
+	}
 	return bytesSents;
 }
 
