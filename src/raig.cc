@@ -198,6 +198,8 @@ int Raig::RaigImpl::readBuffer()
 
 		// Add a location to the path vector
 		m_vPath.push_back(location);
+
+		sprintf(m_cBuffer, "idle_");
 	}
 	else if(strcmp(statusFlag, "processing") == 0)
 	{
@@ -225,6 +227,8 @@ int Raig::RaigImpl::readBuffer()
 		m_vCompletePath.clear();
 		m_vCompletePath = m_vPath;
 		m_vPath.clear();
+
+		sprintf(m_cBuffer, "idle_");
 	}
 
 	return receivedBytes;
