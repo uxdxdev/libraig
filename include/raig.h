@@ -27,7 +27,7 @@ public:
 	~Raig();
 	// Libsocket wrapper functions to abstract the library and reduce coupling
 	// Wrapper for libsocket Connection() that creates a peer connection based on the
-	int InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */);
+	int InitConnection(char *hostname, char *service);
 
 	// Store the path in a vector of x, y coordinate locations
 	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);

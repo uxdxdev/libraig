@@ -21,7 +21,7 @@ public:
 	// API
 	// Libsocket wrapper functions to abstract the library and reduce coupling
 	// Wrapper for libsocket Connection() that creates a peer connection based on the
-	int InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */);
+	int InitConnection(char *hostname, char *service);
 
 	// Find a path using A* from source to destination
 	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);
@@ -73,9 +73,10 @@ Raig::~Raig()
 
 // Libsocket wrapper functions to abstract the library and reduce coupling
 // Wrapper for libsocket Connection() that creates a peer connection based on the
-int Raig::InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */)
+int Raig::InitConnection(char *hostname, char *service)
 {
-	return m_Impl->InitConnection(hostname, service, type, protocol);
+	// Always going to be a client TCP connection
+	return m_Impl->InitConnection(hostname, service);
 }
 
 void Raig::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
@@ -129,10 +130,10 @@ Raig::RaigImpl::~RaigImpl()
 
 // Libsocket wrapper functions to abstract the library and reduce coupling
 // Wrapper for libsocket Connection() that creates a peer connection based on the
-int Raig::RaigImpl::InitConnection(char *hostname, char *service, int type /* Client or Server */, int protocol /* UDP or TCP */)
+int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 {
 	// Initialize connection to the raig server
-	m_iSocketFileDescriptor = Connection(hostname, service, type, protocol);
+	m_iSocketFileDescriptor = Connection(hostname, service, TYPE_CLIENT, SOCK_STREAM);
 
 	return m_iSocketFileDescriptor;
 }
