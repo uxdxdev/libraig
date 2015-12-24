@@ -157,7 +157,7 @@ int Raig::RaigImpl::sendBuffer()
 	int flags = 0;
 	int bytesSents = 0;
 
-	printf("Buffer: %s", m_cBuffer);
+	printf("Buffer: %s\n", m_cBuffer);
 	bytesSents = Send(m_iSocketFileDescriptor, m_cBuffer, size, flags);
 
 	char *statusFlag = strtok((char*)m_cBuffer, "_");
@@ -179,7 +179,7 @@ int Raig::RaigImpl::readBuffer()
 	// Store network data in buffer and return pointer
 	receivedBytes = Recv(m_iSocketFileDescriptor, m_cBuffer, MAX_BUF_SIZE, flags);
 
-	printf("Processing packet...\n");
+	//printf("Processing packet...\n");
 	char *statusFlag = strtok((char*)m_cBuffer, "_");
 
 	if(strcmp(statusFlag, "idle") == 0)
@@ -255,7 +255,7 @@ void Raig::RaigImpl::readData(struct Packet *packet)
 
 void Raig::RaigImpl::update()
 {
-	std::cout << "Raig::RaigImpl::update()" << std::endl;
+	//std::cout << "Raig::RaigImpl::update()" << std::endl;
 
 	// Send contents of buffer to the server
 	sendBuffer();
