@@ -143,6 +143,9 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 
 	// add pathfinding query to the buffer
 	sprintf(m_cBuffer, "path_%d_%d_%d_%d_%d", m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
+
+	// Clear the vector in order to get new path
+	m_vCompletePath.clear();
 }
 
 std::vector<Location> Raig::RaigImpl::getPath()
