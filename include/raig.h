@@ -2,6 +2,7 @@
 #define _RAIG_RAIG_H
 
 #include <memory>
+#include <vector>
 #include <iostream>
 
 namespace raig{

@@ -1,4 +1,3 @@
-#include <vector>
 #include <string>
 
 #include "../include/raig.h" // API for developers
