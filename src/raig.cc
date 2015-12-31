@@ -136,7 +136,7 @@ Raig::RaigImpl::RaigImpl()
 
 	m_iSentSequence = 0;
 
-	m_bIsPathfindingComplete = false;
+	m_bIsPathfindingComplete = true;
 
 	// Initial value in buffer is 'idle' to signal to the server
 	// that a game has started and there are no current requests
@@ -161,6 +161,8 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
 {
 	m_iSentSequence++;
+
+	m_bIsPathfindingComplete = false;
 
 	// add pathfinding query to the buffer
 	sprintf(m_cBuffer, "path_%d_%d_%d_%d_%d", m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
