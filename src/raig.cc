@@ -28,6 +28,8 @@ public:
 	// Read the path data received by the server
 	std::vector<Location> getPath();
 
+	bool IsPathfindingComplete();
+
 	// send buffer to the server
 	int sendBuffer();
 
@@ -57,6 +59,9 @@ public:
 	std::vector<Location> m_vCompletePath;
 
 	int m_iSentSequence;
+
+	bool m_bIsPathfindingComplete;
+
 };
 
 /*
@@ -88,6 +93,11 @@ std::vector<Location> Raig::getPath()
 	return m_Impl->getPath();
 }
 
+bool Raig::IsPathfindingComplete()
+{
+	return m_Impl->IsPathfindingComplete();
+}
+
 void Raig::sendData(struct Packet* packet)
 {
 	m_Impl->sendData(packet);
@@ -116,6 +126,8 @@ Raig::RaigImpl::RaigImpl()
 	m_iSocketFileDescriptor = -1;
 
 	m_iSentSequence = 0;
+
+	m_bIsPathfindingComplete = false;
 
 	// Initial value in buffer is 'idle' to signal to the server
 	// that a game has started and there are no current requests
@@ -150,7 +162,15 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 
 std::vector<Location> Raig::RaigImpl::getPath()
 {
+	// Reset the path complete flag after the value has been
+	// returned to the client.
+	m_bIsPathfindingComplete = false;
 	return m_vCompletePath;
+}
+
+bool Raig::RaigImpl::IsPathfindingComplete()
+{
+	return m_bIsPathfindingComplete;
 }
 
 // Receive messages from the server using libsocket TODO: create wrapper in libsocket for revfrom()
@@ -220,16 +240,16 @@ int Raig::RaigImpl::readBuffer()
 		// Parse the buffer and add the final location to the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
 		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeY = strtok((char*)NULL, "_"); // Y coordinate
+		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
 
 		std::string locationId(nodeId); // char array to string
 		int locationX = std::atoi(nodeX); // char array to int
-		int locationY = std::atoi(nodeY); // char array to int
+		int locationZ = std::atoi(nodeZ); // char array to int
 
 		Location location = {
 				locationId,
 				locationX,
-				locationY
+				locationZ
 		};
 
 		// Add a location to the path vector
@@ -237,6 +257,8 @@ int Raig::RaigImpl::readBuffer()
 		m_vCompletePath.clear();
 		m_vCompletePath = m_vPath;
 		m_vPath.clear();
+
+		m_bIsPathfindingComplete = true;
 
 		sprintf(m_cBuffer, "idle_");
 	}
