@@ -35,6 +35,8 @@ public:
 
 	std::vector<Location> getPath();
 
+	bool IsPathfindingComplete();
+
 	void sendData(struct Packet* packet);
 
 	void readData(struct Packet* packet);
