@@ -173,9 +173,6 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 
 std::vector<Location> Raig::RaigImpl::getPath()
 {
-	// Reset the path complete flag after the value has been
-	// returned to the client.
-	//m_bIsPathfindingComplete = false;
 	return m_vCompletePath;
 }
 
