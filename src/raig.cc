@@ -189,8 +189,6 @@ int Raig::RaigImpl::sendBuffer()
 	//printf("Buffer: %s\n", m_cBuffer);
 	bytesSents = Send(m_iSocketFileDescriptor, m_cBuffer, size, flags);
 
-	char *statusFlag = strtok((char*)m_cBuffer, "_");
-
 	return bytesSents;
 }
 
@@ -225,6 +223,7 @@ int Raig::RaigImpl::readBuffer()
 
 		// Add a location to the path vector
 		m_vPath.push_back(location);
+		ClearBuffer();
 	}
 	else if(strcmp(statusFlag, "done") == 0)
 	{
@@ -252,6 +251,7 @@ int Raig::RaigImpl::readBuffer()
 		m_bIsPathfindingComplete = true;
 
 		m_eState = IDLE;
+		ClearBuffer();
 	}
 
 	return receivedBytes;
@@ -259,7 +259,7 @@ int Raig::RaigImpl::readBuffer()
 
 void Raig::RaigImpl::ClearBuffer()
 {
-	sprintf(m_cBuffer, "null");
+	sprintf(m_cBuffer, "null_");
 }
 
 void Raig::RaigImpl::sendData(struct Packet* packet)
