@@ -157,6 +157,7 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 
 std::vector<Location> Raig::RaigImpl::getPath()
 {
+	std::reverse(m_vCompletePath.begin(), m_vCompletePath.end());
 	return m_vCompletePath;
 }
 
