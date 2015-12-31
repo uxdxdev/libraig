@@ -8,6 +8,11 @@ extern "C" {
 
 using namespace raig;
 
+enum State{
+	IDLE,
+	PROCESSING
+};
+
 // RaigImpl class declaration
 class Raig::RaigImpl
 {
@@ -61,6 +66,8 @@ public:
 	int m_iSentSequence;
 
 	bool m_bIsPathfindingComplete;
+
+	State m_eState;
 
 };
 
@@ -122,6 +129,8 @@ void Raig::update()
 
 Raig::RaigImpl::RaigImpl()
 {
+	m_eState = IDLE;
+
 	// Socket file descriptor initialization
 	m_iSocketFileDescriptor = -1;
 
@@ -164,7 +173,7 @@ std::vector<Location> Raig::RaigImpl::getPath()
 {
 	// Reset the path complete flag after the value has been
 	// returned to the client.
-	m_bIsPathfindingComplete = false;
+	//m_bIsPathfindingComplete = false;
 	return m_vCompletePath;
 }
 
@@ -259,6 +268,8 @@ int Raig::RaigImpl::readBuffer()
 		m_vPath.clear();
 
 		m_bIsPathfindingComplete = true;
+
+		m_eState = IDLE;
 
 		sprintf(m_cBuffer, "idle_");
 	}
