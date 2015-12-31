@@ -137,10 +137,6 @@ Raig::RaigImpl::RaigImpl()
 	m_iSentSequence = 0;
 
 	m_bIsPathfindingComplete = true;
-
-	// Initial value in buffer is 'idle' to signal to the server
-	// that a game has started and there are no current requests
-	sprintf(m_cBuffer, "idle_");
 }
 
 Raig::RaigImpl::~RaigImpl()
@@ -193,11 +189,6 @@ int Raig::RaigImpl::sendBuffer()
 
 	char *statusFlag = strtok((char*)m_cBuffer, "_");
 
-	if(strcmp(statusFlag, "path") == 0)
-	{
-		// Server is waiting for a request
-		//sprintf(m_cBuffer, "idle_");
-	}
 	return bytesSents;
 }
 
@@ -236,8 +227,6 @@ int Raig::RaigImpl::readBuffer()
 
 		// Add a location to the path vector
 		m_vPath.push_back(location);
-
-		//sprintf(m_cBuffer, "idle_");
 	}
 	else if(strcmp(statusFlag, "processing") == 0)
 	{
@@ -269,8 +258,6 @@ int Raig::RaigImpl::readBuffer()
 		m_bIsPathfindingComplete = true;
 
 		m_eState = IDLE;
-
-		//sprintf(m_cBuffer, "idle_");
 	}
 
 	return receivedBytes;
