@@ -41,6 +41,8 @@ public:
 	// read data from the network into the buffer
 	int readBuffer();
 
+	void ClearBuffer();
+
 	// Send packet data
 	void sendData(struct Packet* packet);
 
@@ -204,11 +206,7 @@ int Raig::RaigImpl::readBuffer()
 	//printf("Processing packet...\n");
 	char *statusFlag = strtok((char*)m_cBuffer, "_");
 
-	if(strcmp(statusFlag, "idle") == 0)
-	{
-		// Server is waiting for a request
-	}
-	else if(strcmp(statusFlag, "node") == 0)
+	if(strcmp(statusFlag, "node") == 0)
 	{
 		// Parse the buffer and construct the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
@@ -227,10 +225,6 @@ int Raig::RaigImpl::readBuffer()
 
 		// Add a location to the path vector
 		m_vPath.push_back(location);
-	}
-	else if(strcmp(statusFlag, "processing") == 0)
-	{
-		// Server is processing request
 	}
 	else if(strcmp(statusFlag, "done") == 0)
 	{
@@ -261,6 +255,11 @@ int Raig::RaigImpl::readBuffer()
 	}
 
 	return receivedBytes;
+}
+
+void Raig::RaigImpl::ClearBuffer()
+{
+	sprintf(m_cBuffer, "null");
 }
 
 void Raig::RaigImpl::sendData(struct Packet* packet)
