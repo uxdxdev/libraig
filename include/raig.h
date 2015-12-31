@@ -26,8 +26,7 @@ class Raig
 public:
 	Raig();
 	~Raig();
-	// Libsocket wrapper functions to abstract the library and reduce coupling
-	// Wrapper for libsocket Connection() that creates a peer connection based on the
+
 	int InitConnection(char *hostname, char *service);
 
 	// Store the path in a vector of x, y coordinate locations
@@ -44,8 +43,8 @@ public:
 	void update();
 
 private:
-	class RaigImpl; // Forward declaration
-	std::unique_ptr<RaigImpl> m_Impl; // Raig implementation using auto_ptr
+	class RaigImpl;
+	std::unique_ptr<RaigImpl> m_Impl;
 };
 
 } // namespace raig

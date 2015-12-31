@@ -19,12 +19,8 @@ class Raig::RaigImpl
 public:
 
 	RaigImpl();
-
 	~RaigImpl();
 
-	// API
-	// Libsocket wrapper functions to abstract the library and reduce coupling
-	// Wrapper for libsocket Connection() that creates a peer connection based on the
 	int InitConnection(char *hostname, char *service);
 
 	// Find a path using A* from source to destination
@@ -84,11 +80,8 @@ Raig::~Raig()
 {
 }
 
-// Libsocket wrapper functions to abstract the library and reduce coupling
-// Wrapper for libsocket Connection() that creates a peer connection based on the
 int Raig::InitConnection(char *hostname, char *service)
 {
-	// Always going to be a client TCP connection
 	return m_Impl->InitConnection(hostname, service);
 }
 
@@ -132,12 +125,8 @@ void Raig::update()
 Raig::RaigImpl::RaigImpl()
 {
 	m_eState = IDLE;
-
-	// Socket file descriptor initialization
 	m_iSocketFileDescriptor = -1;
-
 	m_iSentSequence = 0;
-
 	m_bIsPathfindingComplete = true;
 }
 
@@ -158,14 +147,11 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 
 void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
 {
+	// Store path query data in the system buffer so
+	// it can be sent on the next update
 	m_iSentSequence++;
-
 	m_bIsPathfindingComplete = false;
-
-	// add pathfinding query to the buffer
 	sprintf(m_cBuffer, "path_%d_%d_%d_%d_%d", m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
-
-	// Clear the vector in order to get new path
 	m_vCompletePath.clear();
 }
 
