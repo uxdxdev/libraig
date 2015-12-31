@@ -270,7 +270,7 @@ int Raig::RaigImpl::readBuffer()
 
 		m_eState = IDLE;
 
-		sprintf(m_cBuffer, "idle_");
+		//sprintf(m_cBuffer, "idle_");
 	}
 
 	return receivedBytes;
