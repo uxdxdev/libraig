@@ -29,6 +29,8 @@ public:
 
 	int InitConnection(char *hostname, char *service);
 
+	void CreateGameWorld(int size);
+
 	// Store the path in a vector of x, y coordinate locations
 	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);
 

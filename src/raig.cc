@@ -23,6 +23,8 @@ public:
 
 	int InitConnection(char *hostname, char *service);
 
+	void CreateGameWorld(int size);
+
 	// Find a path using A* from source to destination
 	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);
 
@@ -85,6 +87,11 @@ int Raig::InitConnection(char *hostname, char *service)
 	return m_Impl->InitConnection(hostname, service);
 }
 
+void Raig::CreateGameWorld(int size)
+{
+	m_Impl->CreateGameWorld(size);
+}
+
 void Raig::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
 {
 	m_Impl->findPath(sourceX, sourceY, destinationX, destinationY);
@@ -143,6 +150,11 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 	m_iSocketFileDescriptor = Connection(hostname, service, TYPE_CLIENT, SOCK_STREAM);
 
 	return m_iSocketFileDescriptor;
+}
+
+void Raig::RaigImpl::CreateGameWorld(int size)
+{
+	sprintf(m_cBuffer, "gameworld_%d", size);
 }
 
 void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
