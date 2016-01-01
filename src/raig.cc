@@ -155,6 +155,7 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 void Raig::RaigImpl::CreateGameWorld(int size)
 {
 	sprintf(m_cBuffer, "gameworld_%d", size);
+	sendBuffer();
 }
 
 void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
