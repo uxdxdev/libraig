@@ -32,17 +32,17 @@ public:
 	void CreateGameWorld(int size);
 
 	// Store the path in a vector of x, y coordinate locations
-	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);
+	void FindPath(int sourceX, int sourceY, int destinationX, int destinationY);
 
-	std::vector<Location> getPath();
+	std::vector<Location> GetPath();
 
 	bool IsPathfindingComplete();
 
-	void sendData(struct Packet* packet);
+	void SendData(struct Packet* packet);
 
-	void readData(struct Packet* packet);
+	void ReadData(struct Packet* packet);
 
-	void update();
+	void Update();
 
 private:
 	class RaigImpl;

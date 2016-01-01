@@ -92,12 +92,12 @@ void Raig::CreateGameWorld(int size)
 	m_Impl->CreateGameWorld(size);
 }
 
-void Raig::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
+void Raig::FindPath(int sourceX, int sourceY, int destinationX, int destinationY)
 {
 	m_Impl->findPath(sourceX, sourceY, destinationX, destinationY);
 }
 
-std::vector<Location> Raig::getPath()
+std::vector<Location> Raig::GetPath()
 {
 	return m_Impl->getPath();
 }
@@ -107,17 +107,17 @@ bool Raig::IsPathfindingComplete()
 	return m_Impl->IsPathfindingComplete();
 }
 
-void Raig::sendData(struct Packet* packet)
+void Raig::SendData(struct Packet* packet)
 {
 	m_Impl->sendData(packet);
 }
 
-void Raig::readData(struct Packet* packet)
+void Raig::ReadData(struct Packet* packet)
 {
 	m_Impl->readData(packet);
 }
 
-void Raig::update()
+void Raig::Update()
 {
 	m_Impl->update();
 }
