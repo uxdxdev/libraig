@@ -259,7 +259,7 @@ int Raig::RaigImpl::readBuffer()
 
 void Raig::RaigImpl::ClearBuffer()
 {
-	sprintf(m_cBuffer, "null_");
+	sprintf(m_cBuffer, "0_");
 }
 
 void Raig::RaigImpl::sendData(struct Packet* packet)
