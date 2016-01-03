@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include "vector3.h"
 
 namespace raig{
 
@@ -13,12 +14,6 @@ struct Packet
 	int x;
 	int y;
 	int completeFlag;
-};
-
-struct Location{
-	std::string id;
-	int x;
-	int y;
 };
 
 class Raig
@@ -34,7 +29,7 @@ public:
 	// Store the path in a vector of x, y coordinate locations
 	void FindPath(int sourceX, int sourceY, int destinationX, int destinationY);
 
-	std::vector<Location> GetPath();
+	std::vector<std::shared_ptr<Vector3> > *GetPath();
 
 	bool IsPathfindingComplete();
 

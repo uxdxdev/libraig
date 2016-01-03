@@ -29,7 +29,7 @@ public:
 	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);
 
 	// Read the path data received by the server
-	std::vector<Location> getPath();
+	std::vector<std::shared_ptr<Vector3> > *GetPath();
 
 	bool IsPathfindingComplete();
 
@@ -60,8 +60,8 @@ public:
 	char m_cBuffer[MAX_BUF_SIZE];
 
 	// vector of locations
-	std::vector<Location> m_vPath;
-	std::vector<Location> m_vCompletePath;
+	std::vector<std::shared_ptr<Vector3> > m_vPath;
+	std::vector<std::shared_ptr<Vector3> > m_vCompletePath;
 
 	int m_iSentSequence;
 
@@ -97,9 +97,9 @@ void Raig::FindPath(int sourceX, int sourceY, int destinationX, int destinationY
 	m_Impl->findPath(sourceX, sourceY, destinationX, destinationY);
 }
 
-std::vector<Location> Raig::GetPath()
+std::vector<std::shared_ptr<Vector3> > *Raig::GetPath()
 {
-	return m_Impl->getPath();
+	return m_Impl->GetPath();
 }
 
 bool Raig::IsPathfindingComplete()
@@ -168,10 +168,10 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 	m_vCompletePath.clear();
 }
 
-std::vector<Location> Raig::RaigImpl::getPath()
+std::vector<std::shared_ptr<Vector3> > *Raig::RaigImpl::GetPath()
 {
 	std::reverse(m_vCompletePath.begin(), m_vCompletePath.end());
-	return m_vCompletePath;
+	return &m_vCompletePath;
 }
 
 bool Raig::RaigImpl::IsPathfindingComplete()
@@ -209,20 +209,15 @@ int Raig::RaigImpl::readBuffer()
 		// Parse the buffer and construct the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
 		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeY = strtok((char*)NULL, "_"); // Y coordinate
+		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
 
 		std::string locationId(nodeId); // char array to string
 		int locationX = std::atoi(nodeX); // char array to int
-		int locationY = std::atoi(nodeY); // char array to int
+		int locationZ = std::atoi(nodeZ); // char array to int
 
-		Location location = {
-				locationId,
-				locationX,
-				locationY
-		};
 
 		// Add a location to the path vector
-		m_vPath.push_back(location);
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		ClearBuffer();
 	}
 	else if(strcmp(statusFlag, "done") == 0)
@@ -236,14 +231,8 @@ int Raig::RaigImpl::readBuffer()
 		int locationX = std::atoi(nodeX); // char array to int
 		int locationZ = std::atoi(nodeZ); // char array to int
 
-		Location location = {
-				locationId,
-				locationX,
-				locationZ
-		};
-
 		// Add a location to the path vector
-		m_vPath.push_back(location);
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		m_vCompletePath.clear();
 		m_vCompletePath = m_vPath;
 		m_vPath.clear();
