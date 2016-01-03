@@ -1,7 +1,8 @@
 #include <string>
 
 #include "../include/raig.h" // API for developers
-
+#include <algorithm>
+#include <cstring>
 extern "C" {
 	#include "../external/libsocket/include/socket.h"
 }
