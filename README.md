@@ -8,7 +8,7 @@ $ make
 ```
 
 # Instructions
-Copy the `include` and `lib` folders to you project and link against the `libraig.*` dynamic library.
+Copy the `include` and `lib` folders to your project directory and link against the `libraig.*` dynamic library in `lib/`.
 
 
 
