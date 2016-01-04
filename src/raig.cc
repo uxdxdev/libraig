@@ -256,7 +256,7 @@ void Raig::RaigImpl::update()
 		// Add a location to the path vector
 		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		//ClearBuffer();
+		ClearBuffer();
 	}
 	else if(strcmp(statusFlag, "done") == 0)
 	{
@@ -280,7 +280,7 @@ void Raig::RaigImpl::update()
 		m_bIsPathfindingComplete = true;
 
 		m_eState = IDLE;
-		//ClearBuffer();
+		ClearBuffer();
 	}
 }
 
