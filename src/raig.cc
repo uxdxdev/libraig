@@ -211,7 +211,7 @@ int Raig::RaigImpl::ReadBuffer()
 
 	if(strcmp(m_cRecvBuffer, "0") != 0)
 	{
-		//printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
+		printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
 	}
 
 	return receivedBytes;
@@ -245,7 +245,7 @@ void Raig::RaigImpl::update()
 	// Read messages from the server
 	ReadBuffer();
 
-	char *statusFlag = strtok((char*)m_cBuffer, "_");
+	char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
 
 	if(strcmp(statusFlag, "node") == 0)
 	{
