@@ -246,13 +246,14 @@ void Raig::RaigImpl::update()
 		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
 
 		//std::string locationId(nodeId); // char array to string
+		int locationId = std::atoi(nodeId); // char array to int
 		int locationX = std::atoi(nodeX); // char array to int
 		int locationZ = std::atoi(nodeZ); // char array to int
 
 
 		// Add a location to the path vector
 		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(nodeId, locationX, 0, locationZ)));
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		//ClearBuffer();
 	}
 	else if(strcmp(statusFlag, "done") == 0)
@@ -263,12 +264,13 @@ void Raig::RaigImpl::update()
 		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
 
 		//std::string locationId(nodeId); // char array to string
+		int locationId = std::atoi(nodeId); // char array to int
 		int locationX = std::atoi(nodeX); // char array to int
 		int locationZ = std::atoi(nodeZ); // char array to int
 
 		// Add a location to the path vector
 		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(nodeId, locationX, 0, locationZ)));
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		m_vCompletePath.clear();
 		m_vCompletePath = m_vPath;
 		m_vPath.clear();
