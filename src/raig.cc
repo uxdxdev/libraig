@@ -60,6 +60,8 @@ public:
 	// Network buffer
 	char m_cBuffer[MAX_BUF_SIZE];
 
+	char m_cRecvBuffer[MAX_BUF_SIZE];
+
 	// vector of locations
 	std::vector<std::shared_ptr<Vector3> > m_vPath;
 	std::vector<std::shared_ptr<Vector3> > m_vCompletePath;
@@ -205,11 +207,11 @@ int Raig::RaigImpl::ReadBuffer()
 	int receivedBytes = 0;
 
 	// Store network data in buffer and return pointer
-	receivedBytes = Recv(m_iSocketFileDescriptor, m_cBuffer, MAX_BUF_SIZE, flags);
+	receivedBytes = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, MAX_BUF_SIZE, flags);
 
-	if(strcmp(m_cBuffer, "0") != 0)
+	if(strcmp(m_cRecvBuffer, "0") != 0)
 	{
-		printf("ReadBuffer() OK buffer: %s\n", m_cBuffer);
+		printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
 	}
 
 	return receivedBytes;
@@ -218,6 +220,7 @@ int Raig::RaigImpl::ReadBuffer()
 void Raig::RaigImpl::ClearBuffer()
 {
 	sprintf(m_cBuffer, "0_");
+	sprintf(m_cRecvBuffer, "0_");
 }
 
 void Raig::RaigImpl::sendData(struct Packet* packet)
