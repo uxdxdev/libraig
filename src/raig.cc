@@ -211,7 +211,7 @@ int Raig::RaigImpl::ReadBuffer()
 
 	if(strcmp(m_cRecvBuffer, "0") != 0)
 	{
-		printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
+		//printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
 	}
 
 	return receivedBytes;
