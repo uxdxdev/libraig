@@ -150,6 +150,8 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 	// Initialize connection to the raig server
 	m_iSocketFileDescriptor = Connection(hostname, service, TYPE_CLIENT, SOCK_STREAM);
 
+	SetNonBlocking(m_iSocketFileDescriptor);
+
 	return m_iSocketFileDescriptor;
 }
 
