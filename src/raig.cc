@@ -199,11 +199,14 @@ int Raig::RaigImpl::sendBuffer()
 // Receive data from the connected server using recvfrom()
 int Raig::RaigImpl::ReadBuffer()
 {
+	printf("Called ReadBuffer()\n");
+
 	int flags = 0;
 	int receivedBytes = 0;
 
 	// Store network data in buffer and return pointer
 	receivedBytes = Recv(m_iSocketFileDescriptor, m_cBuffer, MAX_BUF_SIZE, flags);
+	printf("ReadBuffer() OK\n");
 
 	return receivedBytes;
 }
@@ -235,7 +238,6 @@ void Raig::RaigImpl::update()
 	// Read messages from the server
 	ReadBuffer();
 
-	//printf("Processing packet...\n");
 	char *statusFlag = strtok((char*)m_cBuffer, "_");
 
 	if(strcmp(statusFlag, "node") == 0)
