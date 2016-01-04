@@ -7,7 +7,8 @@ public:
 	int m_iX;
 	int m_iY;
 	int m_iZ;
-	std::string m_iId;
+	//std::string m_iId;
+	char *m_iId;
 
 	Vector3()
 	{
@@ -16,7 +17,7 @@ public:
 		m_iZ = 0;
 	}
 
-	Vector3(std::string id, int x, int y, int z)
+	Vector3(/*std::string id*/char *id, int x, int y, int z)
 	{
 		m_iX = x;
 		m_iY = y;
