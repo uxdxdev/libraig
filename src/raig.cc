@@ -38,7 +38,7 @@ public:
 	int sendBuffer();
 
 	// read data from the network into the buffer
-	int readBuffer();
+	int ReadBuffer();
 
 	void ClearBuffer();
 
@@ -168,6 +168,7 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 	m_iSentSequence++;
 	m_bIsPathfindingComplete = false;
 	sprintf(m_cBuffer, "path_%d_%d_%d_%d_%d", m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
+	sendBuffer();
 	m_vCompletePath.clear();
 }
 
@@ -196,55 +197,13 @@ int Raig::RaigImpl::sendBuffer()
 }
 
 // Receive data from the connected server using recvfrom()
-int Raig::RaigImpl::readBuffer()
+int Raig::RaigImpl::ReadBuffer()
 {
 	int flags = 0;
 	int receivedBytes = 0;
 
 	// Store network data in buffer and return pointer
 	receivedBytes = Recv(m_iSocketFileDescriptor, m_cBuffer, MAX_BUF_SIZE, flags);
-
-	//printf("Processing packet...\n");
-	char *statusFlag = strtok((char*)m_cBuffer, "_");
-
-	if(strcmp(statusFlag, "node") == 0)
-	{
-		// Parse the buffer and construct the path vector
-		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
-
-		std::string locationId(nodeId); // char array to string
-		int locationX = std::atoi(nodeX); // char array to int
-		int locationZ = std::atoi(nodeZ); // char array to int
-
-
-		// Add a location to the path vector
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		ClearBuffer();
-	}
-	else if(strcmp(statusFlag, "done") == 0)
-	{
-		// Parse the buffer and add the final location to the path vector
-		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
-
-		std::string locationId(nodeId); // char array to string
-		int locationX = std::atoi(nodeX); // char array to int
-		int locationZ = std::atoi(nodeZ); // char array to int
-
-		// Add a location to the path vector
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vCompletePath.clear();
-		m_vCompletePath = m_vPath;
-		m_vPath.clear();
-
-		m_bIsPathfindingComplete = true;
-
-		m_eState = IDLE;
-		ClearBuffer();
-	}
 
 	return receivedBytes;
 }
@@ -271,10 +230,52 @@ void Raig::RaigImpl::update()
 	//std::cout << "Raig::RaigImpl::update()" << std::endl;
 
 	// Send contents of buffer to the server
-	sendBuffer();
+	//sendBuffer();
 
 	// Read messages from the server
-	readBuffer();
+	ReadBuffer();
+
+	//printf("Processing packet...\n");
+	char *statusFlag = strtok((char*)m_cBuffer, "_");
+
+	if(strcmp(statusFlag, "node") == 0)
+	{
+		// Parse the buffer and construct the path vector
+		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
+		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
+		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
+
+		std::string locationId(nodeId); // char array to string
+		int locationX = std::atoi(nodeX); // char array to int
+		int locationZ = std::atoi(nodeZ); // char array to int
+
+
+		// Add a location to the path vector
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+		//ClearBuffer();
+	}
+	else if(strcmp(statusFlag, "done") == 0)
+	{
+		// Parse the buffer and add the final location to the path vector
+		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
+		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
+		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
+
+		std::string locationId(nodeId); // char array to string
+		int locationX = std::atoi(nodeX); // char array to int
+		int locationZ = std::atoi(nodeZ); // char array to int
+
+		// Add a location to the path vector
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+		m_vCompletePath.clear();
+		m_vCompletePath = m_vPath;
+		m_vPath.clear();
+
+		m_bIsPathfindingComplete = true;
+
+		m_eState = IDLE;
+		//ClearBuffer();
+	}
 }
 
 void Raig::RaigImpl::cleanUp()
