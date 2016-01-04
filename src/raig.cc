@@ -199,7 +199,7 @@ int Raig::RaigImpl::sendBuffer()
 // Receive data from the connected server using recvfrom()
 int Raig::RaigImpl::ReadBuffer()
 {
-	printf("Called ReadBuffer()\n");
+	printf("Called ReadBuffer() buffer: %s\n", m_cBuffer);
 
 	int flags = 0;
 	int receivedBytes = 0;
