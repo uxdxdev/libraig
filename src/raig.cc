@@ -207,8 +207,6 @@ int Raig::RaigImpl::ReadBuffer()
 	// Store network data in buffer and return pointer
 	receivedBytes = Recv(m_iSocketFileDescriptor, m_cBuffer, MAX_BUF_SIZE, flags);
 
-	sleep(1);
-
 	if(strcmp(m_cBuffer, "0") != 0)
 	{
 		printf("ReadBuffer() OK buffer: %s\n", m_cBuffer);
