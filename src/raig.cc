@@ -188,7 +188,7 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 	// it can be sent on the next update
 	m_iSentSequence++;
 	m_bIsPathfindingComplete = false;
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_%02d", RaigImpl::PATH, m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d", RaigImpl::PATH, sourceX, sourceY, destinationX, destinationY);
 	sendBuffer();
 	m_vCompletePath.clear();
 	printf("Path query sent OK\n");
