@@ -9,7 +9,7 @@ extern "C" {
 
 using namespace raig;
 
-#define MAX_BUFFER_SIZE 13
+#define MAX_BUFFER_SIZE 12
 
 // RaigImpl class declaration
 class Raig::RaigImpl
@@ -64,6 +64,7 @@ public:
 	std::vector<std::shared_ptr<Vector3> > m_vCompletePath;
 
 	int m_iSentSequence;
+	int m_iRecvSequence;
 
 	bool m_bIsPathfindingComplete;
 
@@ -146,6 +147,7 @@ Raig::RaigImpl::RaigImpl()
 	m_eState = IDLE;
 	m_iSocketFileDescriptor = -1;
 	m_iSentSequence = 0;
+	m_iRecvSequence = -1; // Start counting from -1
 	m_bIsPathfindingComplete = true;
 }
 
@@ -253,7 +255,10 @@ void Raig::RaigImpl::update()
 	//sendBuffer();
 
 	// Read messages from the server
-	ReadBuffer();
+	// If the number of bytes read is less than the full buffer
+	// there is a error. This could be due to a TCP retransmission of
+	// a partial packet.
+	if(ReadBuffer() < MAX_BUFFER_SIZE) return;
 
 	char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
 	int statusCode = atoi(statusFlag); // Convert to integer
@@ -269,6 +274,7 @@ void Raig::RaigImpl::update()
 		int locationId = std::atoi(nodeId); // char array to int
 		int locationX = std::atoi(nodeX); // char array to int
 		int locationZ = std::atoi(nodeZ); // char array to int
+
 
 
 		// Add a location to the path vector
