@@ -14,6 +14,8 @@ enum State{
 	PROCESSING
 };
 
+#define MAX_BUFFER_SIZE 16
+
 // RaigImpl class declaration
 class Raig::RaigImpl
 {
@@ -58,9 +60,9 @@ public:
 	int m_iSocketFileDescriptor;
 
 	// Network buffer
-	char m_cBuffer[MAX_BUF_SIZE];
+	char m_cBuffer[MAX_BUFFER_SIZE];
 
-	char m_cRecvBuffer[MAX_BUF_SIZE];
+	char m_cRecvBuffer[MAX_BUFFER_SIZE];
 
 	// vector of locations
 	std::vector<std::shared_ptr<Vector3> > m_vPath;
@@ -202,12 +204,12 @@ int Raig::RaigImpl::sendBuffer()
 int Raig::RaigImpl::ReadBuffer()
 {
 	//printf("Called ReadBuffer() buffer BEFORE: %s\n", m_cBuffer);
-
+	size_t size = sizeof(m_cRecvBuffer);
 	int flags = 0;
 	int receivedBytes = 0;
 
 	// Store network data in buffer and return pointer
-	receivedBytes = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, MAX_BUF_SIZE, flags);
+	receivedBytes = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
 
 	if(strcmp(m_cRecvBuffer, "0") != 0)
 	{
