@@ -9,7 +9,7 @@ extern "C" {
 
 using namespace raig;
 
-#define MAX_BUFFER_SIZE 16
+#define MAX_BUFFER_SIZE 12
 
 // RaigImpl class declaration
 class Raig::RaigImpl
