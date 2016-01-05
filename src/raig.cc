@@ -223,7 +223,7 @@ int Raig::RaigImpl::ReadBuffer()
 
 	if(strcmp(m_cRecvBuffer, "0") != 0)
 	{
-		printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
+
 	}
 
 	return receivedBytes;
@@ -265,6 +265,7 @@ void Raig::RaigImpl::update()
 
 	if(statusCode == RaigImpl::NODE)
 	{
+		printf("NODE: %s\n", m_cRecvBuffer);
 		// Parse the buffer and construct the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
 		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
@@ -275,8 +276,6 @@ void Raig::RaigImpl::update()
 		int locationX = std::atoi(nodeX); // char array to int
 		int locationZ = std::atoi(nodeZ); // char array to int
 
-
-
 		// Add a location to the path vector
 		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
@@ -284,6 +283,7 @@ void Raig::RaigImpl::update()
 	}
 	else if(statusCode == RaigImpl::END)
 	{
+		printf("END: %s\n", m_cRecvBuffer);
 		// Parse the buffer and add the final location to the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
 		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
