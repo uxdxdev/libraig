@@ -203,6 +203,7 @@ int Raig::RaigImpl::sendBuffer()
 
 	//printf("Buffer: %s\n", m_cBuffer);
 	bytesSents = Send(m_iSocketFileDescriptor, m_cBuffer, size, flags);
+	printf("Buffer: %s\n", m_cBuffer);
 	ClearBuffer();
 	return bytesSents;
 }
@@ -218,7 +219,7 @@ int Raig::RaigImpl::ReadBuffer()
 	// Store network data in buffer and return pointer
 	receivedBytes = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
 
-	if(strcmp(m_cRecvBuffer, "0") != 0 || strcmp(m_cRecvBuffer, "0_") != 0)
+	if(strcmp(m_cRecvBuffer, "0") != 0)
 	{
 		printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
 	}
