@@ -9,11 +9,6 @@ extern "C" {
 
 using namespace raig;
 
-enum State{
-	IDLE,
-	PROCESSING
-};
-
 #define MAX_BUFFER_SIZE 16
 
 // RaigImpl class declaration
@@ -71,6 +66,18 @@ public:
 	int m_iSentSequence;
 
 	bool m_bIsPathfindingComplete;
+
+	enum State{
+		IDLE,
+		PROCESSING
+	};
+
+	enum PacketCode{
+		GAMEWORLD,
+		PATH,
+		NODE,
+		END
+	};
 
 	State m_eState;
 
@@ -161,7 +168,7 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 
 void Raig::RaigImpl::CreateGameWorld(int size)
 {
-	sprintf(m_cBuffer, "gameworld_%d", size);
+	sprintf(m_cBuffer, "%02d_%02d", RaigImpl::GAMEWORLD, size);
 	sendBuffer();
 }
 
@@ -171,7 +178,7 @@ void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int de
 	// it can be sent on the next update
 	m_iSentSequence++;
 	m_bIsPathfindingComplete = false;
-	sprintf(m_cBuffer, "path_%d_%d_%d_%d_%d", m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
+	sprintf(m_cBuffer, "%02d_%02d_%02d_%02d_%02d_%02d", RaigImpl::PATH, m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
 	sendBuffer();
 	m_vCompletePath.clear();
 }
@@ -211,7 +218,7 @@ int Raig::RaigImpl::ReadBuffer()
 	// Store network data in buffer and return pointer
 	receivedBytes = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
 
-	if(strcmp(m_cRecvBuffer, "0") != 0)
+	if(strcmp(m_cRecvBuffer, "0") != 0 || strcmp(m_cRecvBuffer, "0_") != 0)
 	{
 		printf("ReadBuffer() OK buffer: %s\n", m_cRecvBuffer);
 	}
@@ -248,7 +255,51 @@ void Raig::RaigImpl::update()
 	ReadBuffer();
 
 	char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
+	int statusCode = atoi(statusFlag); // Convert to integer
 
+	if(statusCode == RaigImpl::NODE)
+	{
+		// Parse the buffer and construct the path vector
+		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
+		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
+		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
+
+		//std::string locationId(nodeId); // char array to string
+		int locationId = std::atoi(nodeId); // char array to int
+		int locationX = std::atoi(nodeX); // char array to int
+		int locationZ = std::atoi(nodeZ); // char array to int
+
+
+		// Add a location to the path vector
+		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+		ClearBuffer();
+	}
+	else if(statusCode == RaigImpl::END)
+	{
+		// Parse the buffer and add the final location to the path vector
+		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
+		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
+		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
+
+		//std::string locationId(nodeId); // char array to string
+		int locationId = std::atoi(nodeId); // char array to int
+		int locationX = std::atoi(nodeX); // char array to int
+		int locationZ = std::atoi(nodeZ); // char array to int
+
+		// Add a location to the path vector
+		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+		m_vCompletePath.clear();
+		m_vCompletePath = m_vPath;
+		m_vPath.clear();
+
+		m_bIsPathfindingComplete = true;
+
+		m_eState = IDLE;
+		ClearBuffer();
+	}
+	/*
 	if(strcmp(statusFlag, "node") == 0)
 	{
 		// Parse the buffer and construct the path vector
@@ -291,6 +342,7 @@ void Raig::RaigImpl::update()
 		m_eState = IDLE;
 		ClearBuffer();
 	}
+	*/
 }
 
 void Raig::RaigImpl::cleanUp()
