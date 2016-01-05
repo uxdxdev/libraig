@@ -9,7 +9,7 @@ extern "C" {
 
 using namespace raig;
 
-#define MAX_BUFFER_SIZE 12
+#define MAX_BUFFER_SIZE 13
 
 // RaigImpl class declaration
 class Raig::RaigImpl
@@ -55,7 +55,7 @@ public:
 	int m_iSocketFileDescriptor;
 
 	// Network buffer
-	char m_cBuffer[MAX_BUFFER_SIZE];
+	char m_cSendBuffer[MAX_BUFFER_SIZE];
 
 	char m_cRecvBuffer[MAX_BUFFER_SIZE];
 
@@ -77,8 +77,11 @@ public:
 		GAMEWORLD,
 		PATH,
 		NODE,
-		END
+		END,
+		EMPTY
 	};
+
+	int m_iProtocolId;
 
 	State m_eState;
 
@@ -144,6 +147,7 @@ void Raig::Update()
 
 Raig::RaigImpl::RaigImpl()
 {
+	m_iProtocolId = 23061912;
 	m_eState = IDLE;
 	m_iSocketFileDescriptor = -1;
 	m_iSentSequence = 0;
@@ -170,19 +174,24 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 
 void Raig::RaigImpl::CreateGameWorld(int size)
 {
-	sprintf(m_cBuffer, "%02d_%02d", RaigImpl::GAMEWORLD, size);
+	sprintf(m_cSendBuffer, "%02d_%03d_0000000000", RaigImpl::GAMEWORLD, size);
 	sendBuffer();
 }
 
 void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
 {
+	if(!IsPathfindingComplete())
+	{
+		return;
+	}
 	// Store path query data in the system buffer so
 	// it can be sent on the next update
 	m_iSentSequence++;
 	m_bIsPathfindingComplete = false;
-	sprintf(m_cBuffer, "%02d_%02d_%02d_%02d_%02d_%02d", RaigImpl::PATH, m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_%02d", RaigImpl::PATH, m_iSentSequence, sourceX, sourceY, destinationX, destinationY);
 	sendBuffer();
 	m_vCompletePath.clear();
+	printf("Path query sent OK\n");
 }
 
 std::vector<std::shared_ptr<Vector3> > *Raig::RaigImpl::GetPath()
@@ -199,13 +208,13 @@ bool Raig::RaigImpl::IsPathfindingComplete()
 // Receive messages from the server using libsocket TODO: create wrapper in libsocket for revfrom()
 int Raig::RaigImpl::sendBuffer()
 {
-	size_t size = strlen(m_cBuffer) + 1;
+	size_t size = strlen(m_cSendBuffer) + 1;
 	int flags = 0;
 	int bytesSents = 0;
 
 	//printf("Buffer: %s\n", m_cBuffer);
-	bytesSents = Send(m_iSocketFileDescriptor, m_cBuffer, size, flags);
-	printf("Buffer: %s\n", m_cBuffer);
+	bytesSents = Send(m_iSocketFileDescriptor, m_cSendBuffer, size, flags);
+	printf("Buffer: %s\n", m_cSendBuffer);
 	ClearBuffer();
 	return bytesSents;
 }
@@ -214,25 +223,53 @@ int Raig::RaigImpl::sendBuffer()
 int Raig::RaigImpl::ReadBuffer()
 {
 	//printf("Called ReadBuffer() buffer BEFORE: %s\n", m_cBuffer);
-	size_t size = sizeof(m_cRecvBuffer);
+	int size = sizeof(m_cRecvBuffer);
+	int bufferSpace = size;
+
 	int flags = 0;
-	int receivedBytes = 0;
+	int bytesRecv = 0;
+	char temp[MAX_BUFFER_SIZE] = "\0";
+	int continueReading = 1;
 
-	// Store network data in buffer and return pointer
-	receivedBytes = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
+	do{
+		bytesRecv = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
 
-	if(strcmp(m_cRecvBuffer, "0") != 0)
-	{
+		if(bytesRecv > 0 && bytesRecv < MAX_BUFFER_SIZE)
+		{
+			printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
+			size -= bytesRecv;
 
-	}
+			if(size > 0)
+			{
+				strcat(temp, m_cRecvBuffer);
+				temp[bytesRecv] = '\0';
+				printf("strcat() temp : %s m_cRecvBuffer : %s\n", temp, m_cRecvBuffer);
+			}
+			else
+			{
+				strcat(temp, m_cRecvBuffer);
+				strcpy(m_cRecvBuffer, temp);
+				printf("strcpy() m_cRecvBuffer : %s temp : %s \n", m_cRecvBuffer, temp);
+			}
+			printf("bytes left to read: %d temp buffer: %s\n", size, temp);
+		}
+		else if(bytesRecv > 0)
+		{
+			printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
+			size -= bytesRecv;
+		}
 
-	return receivedBytes;
+	}while(size > 0);
+
+	temp[0] = '\0';
+
+	return bytesRecv;
 }
 
 void Raig::RaigImpl::ClearBuffer()
 {
-	sprintf(m_cBuffer, "0_");
-	sprintf(m_cRecvBuffer, "0_");
+	sprintf(m_cSendBuffer, "%d", PacketCode::EMPTY);
+	sprintf(m_cRecvBuffer, "%d", PacketCode::EMPTY);
 }
 
 void Raig::RaigImpl::sendData(struct Packet* packet)
@@ -249,23 +286,15 @@ void Raig::RaigImpl::readData(struct Packet *packet)
 
 void Raig::RaigImpl::update()
 {
-	//std::cout << "Raig::RaigImpl::update()" << std::endl;
-
-	// Send contents of buffer to the server
-	//sendBuffer();
-
 	// Read messages from the server
-	// If the number of bytes read is less than the full buffer
-	// there is a error. This could be due to a TCP retransmission of
-	// a partial packet.
-	if(ReadBuffer() < MAX_BUFFER_SIZE) return;
+	ReadBuffer();
 
 	char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
 	int statusCode = atoi(statusFlag); // Convert to integer
 
 	if(statusCode == RaigImpl::NODE)
 	{
-		printf("NODE: %s\n", m_cRecvBuffer);
+		//printf("NODE: %s\n", m_cRecvBuffer);
 		// Parse the buffer and construct the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
 		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
@@ -276,6 +305,13 @@ void Raig::RaigImpl::update()
 		int locationX = std::atoi(nodeX); // char array to int
 		int locationZ = std::atoi(nodeZ); // char array to int
 
+		if(locationId == m_iRecvSequence)
+		{
+			// Already processed the node
+			return;
+		}
+		m_iRecvSequence = locationId;
+
 		// Add a location to the path vector
 		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
@@ -283,7 +319,7 @@ void Raig::RaigImpl::update()
 	}
 	else if(statusCode == RaigImpl::END)
 	{
-		printf("END: %s\n", m_cRecvBuffer);
+		//printf("END: %s\n", m_cRecvBuffer);
 		// Parse the buffer and add the final location to the path vector
 		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
 		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
