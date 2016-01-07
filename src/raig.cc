@@ -295,8 +295,8 @@ int Raig::RaigImpl::ReadBuffer()
 
 void Raig::RaigImpl::ClearBuffer()
 {
-	sprintf(m_cSendBuffer, "%d", PacketCode::EMPTY);
-	sprintf(m_cRecvBuffer, "%d", PacketCode::EMPTY);
+	sprintf(m_cSendBuffer, "%d", RaigImpl::EMPTY);
+	sprintf(m_cRecvBuffer, "%d", RaigImpl::EMPTY);
 }
 
 void Raig::RaigImpl::sendData(struct Packet* packet)
