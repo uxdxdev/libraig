@@ -20,12 +20,10 @@ endif()
 if(UNIX AND NOT APPLE)
   set(PROJECT_LINK_LIBS libsocket.so)
 else()
-  set(CMAKE_INSTALL_RPATH @loader_path/lib)
-  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   set(PROJECT_LINK_LIBS libsocket.dylib)
 endif()
 
-#SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/)
 
 link_directories(lib/)
 
