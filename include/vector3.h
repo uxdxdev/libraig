@@ -25,51 +25,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
-#ifndef _INCLUDE_RAIG_H
-#define _INCLUDE_RAIG_H
+#ifndef _INCLUDE_VECTOR3_H_
+#define _INCLUDE_VECTOR3_H_
 
-#include <memory>
-#include <vector>
-#include <iostream>
-#include "vector3.h"
+#include <string>
 
-namespace raig{
-
-struct Packet
-{
-	char stringData[255];
-	int x;
-	int y;
-	int completeFlag;
-};
-
-class Raig
-{
+class Vector3{
 public:
-	Raig();
-	~Raig();
+	int m_iX;
+	int m_iY;
+	int m_iZ;
+	//std::string m_iId;
+	int m_iId;
 
-	int InitConnection(char *hostname, char *service);
+	Vector3()
+	{
+		m_iX = 0;
+		m_iY = 0;
+		m_iZ = 0;
+	}
 
-	void CreateGameWorld(int size);
+	Vector3(/*std::string id*/int id, int x, int y, int z)
+	{
+		m_iX = x;
+		m_iY = y;
+		m_iZ = z;
+		m_iId = id;
+	}
 
-	// Store the path in a vector of x, y coordinate locations
-	void FindPath(int sourceX, int sourceY, int destinationX, int destinationY);
+	virtual ~Vector3()
+	{
 
-	std::vector<std::shared_ptr<Vector3> > *GetPath();
-
-	bool IsPathfindingComplete();
-
-	void SendData(struct Packet* packet);
-
-	void ReadData(struct Packet* packet);
-
-	void Update();
-
-private:
-	class RaigImpl;
-	std::unique_ptr<RaigImpl> m_Impl;
+	}
 };
 
-} // namespace raig
 #endif
