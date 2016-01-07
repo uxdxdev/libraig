@@ -22,6 +22,10 @@ To use the API don't forget to include the header file `include/raig.h`.
 
 Libraries used in the project are built and installed using cmake.
 
+# Use cases
 
+Libsocket is currently being used in the following projects:
+
+- RaigDemo  https://github.com/damorton/raig-demo.git
 
 
