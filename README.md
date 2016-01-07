@@ -8,9 +8,13 @@ $ make
 ```
 
 ## Instructions
-Download the repo, extract to your third party library folder, `cd path/to/libraig-folder`, build, and link against the `libraig` dynamic library in the `lib/`. 
+- Download the repo
+- Extract to your third party library folder
+- `cd path/to/libraig-folder`
+- Build
+- Link against the `libraig` dynamic library in the `lib/`. 
 
-To use the API include the header file `include/raig.h`.
+To use the API don't forget to include the header file `include/raig.h`.
 
 ## Dependencies
 
