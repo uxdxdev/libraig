@@ -34,3 +34,7 @@ add_library(raig SHARED ${SOURCES})
 add_dependencies(raig libsocket)
 
 target_link_libraries(raig ${PROJECT_LINK_LIBS})
+
+install(TARGETS raig
+  LIBRARY DESTINATION lib
+)
