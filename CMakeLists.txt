@@ -27,7 +27,7 @@ endif()
 
 #SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/)
 
-link_directories(${PROJECT_BINARY_DIR}/lib/)
+link_directories(lib/)
 
 add_library(raig SHARED ${SOURCES})
 
