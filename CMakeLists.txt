@@ -19,6 +19,8 @@ endif()
 if(UNIX AND NOT APPLE)
   set(PROJECT_LINK_LIBS libsocket.so)
 else()
+  set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
   set(PROJECT_LINK_LIBS libsocket.dylib)
 endif()
 
