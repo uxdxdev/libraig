@@ -12,7 +12,7 @@ $ make
 - Extract to your third party library folder
 - `cd path/to/libraig-folder`
 - Build
-- Link against the `libraig` dynamic library in the `lib/`. 
+- Link against the `libraig` dynamic library in the `lib/` folder. 
 
 To use the API don't forget to include the header file `include/raig.h`.
 
