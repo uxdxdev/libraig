@@ -26,7 +26,7 @@ endif()
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/)
 
-link_directories(external/libsocket/lib/)
+link_directories(./external/libsocket/lib/)
 
 add_library(raig SHARED ${SOURCES})
 
