@@ -8,6 +8,7 @@ ExternalProject_Add(libsocket
     GIT_TAG master
     BINARY_DIR ${CMAKE_BINARY_DIR}/external/libsocket
     SOURCE_DIR ${CMAKE_BINARY_DIR}/external/libsocket
+    INSTALL_COMMAND ""
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
 )
 
@@ -25,7 +26,7 @@ endif()
 
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/)
 
-link_directories(lib/)
+link_directories(external/libsocket/lib/)
 
 add_library(raig SHARED ${SOURCES})
 
