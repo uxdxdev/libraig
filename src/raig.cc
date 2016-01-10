@@ -249,7 +249,7 @@ int Raig::RaigImpl::sendBuffer()
 // Receive data from the connected server using recvfrom()
 int Raig::RaigImpl::ReadBuffer()
 {
-	//printf("Called ReadBuffer() buffer BEFORE: %s\n", m_cBuffer);
+	//printf("Called ReadBuffer()\n");
 	int size = sizeof(m_cRecvBuffer);
 	int bufferSpace = size;
 
@@ -313,61 +313,64 @@ void Raig::RaigImpl::readData(struct Packet *packet)
 
 void Raig::RaigImpl::update()
 {
-	// Read messages from the server
-	ReadBuffer();
-
-	char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
-	int statusCode = atoi(statusFlag); // Convert to integer
-
-	if(statusCode == RaigImpl::NODE)
+	if(!m_bIsPathfindingComplete)
 	{
-		//printf("NODE: %s\n", m_cRecvBuffer);
-		// Parse the buffer and construct the path vector
-		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
+		// Read messages from the server
+		ReadBuffer();
 
-		//std::string locationId(nodeId); // char array to string
-		int locationId = std::atoi(nodeId); // char array to int
-		int locationX = std::atoi(nodeX); // char array to int
-		int locationZ = std::atoi(nodeZ); // char array to int
+		char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
+		int statusCode = atoi(statusFlag); // Convert to integer
 
-		if(locationId == m_iRecvSequence)
+		if(statusCode == RaigImpl::NODE)
 		{
-			// Already processed the node
-			return;
+			//printf("NODE: %s\n", m_cRecvBuffer);
+			// Parse the buffer and construct the path vector
+			char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
+			char *nodeX = strtok((char*)NULL, "_"); // X coordinate
+			char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
+
+			//std::string locationId(nodeId); // char array to string
+			int locationId = std::atoi(nodeId); // char array to int
+			int locationX = std::atoi(nodeX); // char array to int
+			int locationZ = std::atoi(nodeZ); // char array to int
+
+			if(locationId == m_iRecvSequence)
+			{
+				// Already processed the node
+				return;
+			}
+			m_iRecvSequence = locationId;
+
+			// Add a location to the path vector
+			//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			ClearBuffer();
 		}
-		m_iRecvSequence = locationId;
+		else if(statusCode == RaigImpl::END)
+		{
+			//printf("END: %s\n", m_cRecvBuffer);
+			// Parse the buffer and add the final location to the path vector
+			char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
+			char *nodeX = strtok((char*)NULL, "_"); // X coordinate
+			char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
 
-		// Add a location to the path vector
-		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		ClearBuffer();
-	}
-	else if(statusCode == RaigImpl::END)
-	{
-		//printf("END: %s\n", m_cRecvBuffer);
-		// Parse the buffer and add the final location to the path vector
-		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
+			//std::string locationId(nodeId); // char array to string
+			int locationId = std::atoi(nodeId); // char array to int
+			int locationX = std::atoi(nodeX); // char array to int
+			int locationZ = std::atoi(nodeZ); // char array to int
 
-		//std::string locationId(nodeId); // char array to string
-		int locationId = std::atoi(nodeId); // char array to int
-		int locationX = std::atoi(nodeX); // char array to int
-		int locationZ = std::atoi(nodeZ); // char array to int
+			// Add a location to the path vector
+			//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			m_vCompletePath.clear();
+			m_vCompletePath = m_vPath;
+			m_vPath.clear();
 
-		// Add a location to the path vector
-		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vCompletePath.clear();
-		m_vCompletePath = m_vPath;
-		m_vPath.clear();
+			m_bIsPathfindingComplete = true;
 
-		m_bIsPathfindingComplete = true;
-
-		m_eState = IDLE;
-		ClearBuffer();
+			m_eState = IDLE;
+			ClearBuffer();
+		}
 	}
 	/*
 	if(strcmp(statusFlag, "node") == 0)
