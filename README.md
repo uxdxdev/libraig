@@ -16,8 +16,10 @@ $ make
 
 To use the API don't forget to include the header file `include/raig.h`, and also connect to `damortonpi.duckdns.org` for testing. 
 
-`m_RaigAI = new raig::Raig();`
-`m_RaigAI->InitConnection("damortonpi.duckdns.org", "27000");`
+```
+m_RaigAI = new raig::Raig();
+m_RaigAI->InitConnection("damortonpi.duckdns.org", "27000");
+```
 
 
 ## Dependencies
