@@ -53,10 +53,13 @@ public:
 
 	void CreateGameWorld(int size);
 
-	// Store the path in a vector of x, y coordinate locations
-	void FindPath(int sourceX, int sourceY, int destinationX, int destinationY);
+	void SetCellOpen(Vector3 cell);
+	void SetCellBlocked(Vector3 cell);
 
-	std::vector<std::shared_ptr<Vector3> > *GetPath();
+	// Store the path in a vector of x, y coordinate locations
+	void FindPath(Vector3 *start, Vector3 *goal);
+
+	std::vector<std::shared_ptr<Vector3> > GetPath();
 
 	bool IsPathfindingComplete();
 

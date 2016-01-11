@@ -50,11 +50,14 @@ public:
 
 	void CreateGameWorld(int size);
 
+	void SetCellOpen(Vector3 cell);
+	void SetCellBlocked(Vector3 cell);
+
 	// Find a path using A* from source to destination
-	void findPath(int sourceX, int sourceY, int destinationX, int destinationY);
+	void FindPath(Vector3 *start, Vector3 *goal);
 
 	// Read the path data received by the server
-	std::vector<std::shared_ptr<Vector3> > *GetPath();
+	std::vector<std::shared_ptr<Vector3> > GetPath();
 
 	bool IsPathfindingComplete();
 
@@ -105,12 +108,16 @@ public:
 		PATH,
 		NODE,
 		END,
-		EMPTY
+		EMPTY,
+		CELL_BLOCKED,
+		CELL_OPEN
 	};
 
 	int m_iProtocolId;
 
 	State m_eState;
+
+	std::vector<std::unique_ptr<Vector3> > m_vBlockedCells;
 
 };
 
@@ -135,12 +142,23 @@ void Raig::CreateGameWorld(int size)
 	m_Impl->CreateGameWorld(size);
 }
 
-void Raig::FindPath(int sourceX, int sourceY, int destinationX, int destinationY)
+void Raig::SetCellOpen(Vector3 cell)
 {
-	m_Impl->findPath(sourceX, sourceY, destinationX, destinationY);
+	m_Impl->SetCellOpen(cell);
 }
 
-std::vector<std::shared_ptr<Vector3> > *Raig::GetPath()
+void Raig::SetCellBlocked(Vector3 cell)
+{
+	m_Impl->SetCellBlocked(cell);
+}
+
+
+void Raig::FindPath(Vector3 *start, Vector3 *goal)
+{
+	m_Impl->FindPath(start, goal);
+}
+
+std::vector<std::shared_ptr<Vector3> > Raig::GetPath()
 {
 	return m_Impl->GetPath();
 }
@@ -174,7 +192,7 @@ void Raig::Update()
 
 Raig::RaigImpl::RaigImpl()
 {
-	m_iProtocolId = 23061912;
+	m_iProtocolId = 23061912; // Turing
 	m_eState = IDLE;
 	m_iSocketFileDescriptor = -1;
 	m_iSentSequence = 0;
@@ -201,30 +219,90 @@ int Raig::RaigImpl::InitConnection(char *hostname, char *service)
 
 void Raig::RaigImpl::CreateGameWorld(int size)
 {
-	sprintf(m_cSendBuffer, "%02d_%03d_0000000000", RaigImpl::GAMEWORLD, size);
+	sprintf(m_cSendBuffer, "%02d_%03d_000000000000", RaigImpl::GAMEWORLD, size);
 	sendBuffer();
 }
 
-void Raig::RaigImpl::findPath(int sourceX, int sourceY, int destinationX, int destinationY)
+void Raig::RaigImpl::SetCellOpen(Vector3 openCell)
+{
+	for(int i = 0; i <= m_vBlockedCells.size(); i++)
+	{
+		if(!m_vBlockedCells.empty())
+		{
+			printf("Cell blocked list: X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ);
+			if(m_vBlockedCells[i]->Compare(&openCell))
+			{
+				printf("Cell X:%d Z:%d == Cell X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ, openCell.m_iX, openCell.m_iZ);
+				m_vBlockedCells.erase(m_vBlockedCells.begin() + i);
+				if(m_vBlockedCells.empty())
+				{
+					printf("Blocked cells list empty\n");
+				}
+			}
+		}
+		else
+		{
+			printf("Blocked cells list empty\n");
+		}
+	}
+
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
+	printf("Cell X:%d Y:%d Z:%d opened - buffer : %s\n", openCell.m_iX, openCell.m_iY, openCell.m_iZ, m_cSendBuffer);
+	sendBuffer();
+}
+
+void Raig::RaigImpl::SetCellBlocked(Vector3 cell)
+{
+	// Add blocked cell to vector
+	m_vBlockedCells.push_back(std::unique_ptr<Vector3>(new Vector3(cell)));
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
+	printf("Cell X:%d Y:%d Z:%d blocked - buffer : %s\n", cell.m_iX, cell.m_iY, cell.m_iZ, m_cSendBuffer);
+	sendBuffer();
+}
+
+void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
 {
 	if(!IsPathfindingComplete())
 	{
 		return;
 	}
+
+	printf("Find path start (%d, %d, %d) : goal (%d, %d, %d)\n", start->m_iX, start->m_iY, start->m_iZ, goal->m_iX, goal->m_iY, goal->m_iZ);
+
+	if(!m_vBlockedCells.empty())
+	{
+		for(int i = 0; i < m_vBlockedCells.size(); i++)
+		{
+			if(m_vBlockedCells[i]->Compare(start) || m_vBlockedCells[i]->Compare(goal))
+			{
+				printf("Invalid path, start or end goal is blocked\n");
+				return;
+			}
+		}
+	}
+
+	printf("Blocked cells vector checked, sending request\n");
+
 	// Store path query data in the system buffer so
 	// it can be sent on the next update
 	m_iSentSequence++;
 	m_bIsPathfindingComplete = false;
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d", RaigImpl::PATH, sourceX, sourceY, destinationX, destinationY);
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
 	sendBuffer();
-	m_vCompletePath.clear();
+	//m_vCompletePath.clear();
+	m_vPath.clear();
+
 	printf("Path query sent OK\n");
 }
 
-std::vector<std::shared_ptr<Vector3> > *Raig::RaigImpl::GetPath()
+std::vector<std::shared_ptr<Vector3> > Raig::RaigImpl::GetPath()
 {
-	std::reverse(m_vCompletePath.begin(), m_vCompletePath.end());
-	return &m_vCompletePath;
+	// Return a copy of the completed path
+	//std::reverse(m_vCompletePath.begin(), m_vCompletePath.end());
+	std::reverse(m_vPath.begin(), m_vPath.end());
+	std::vector<std::shared_ptr<Vector3> > temp(m_vPath);
+	m_vPath.clear();
+	return temp;
 }
 
 bool Raig::RaigImpl::IsPathfindingComplete()
@@ -362,9 +440,9 @@ void Raig::RaigImpl::update()
 			// Add a location to the path vector
 			//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-			m_vCompletePath.clear();
-			m_vCompletePath = m_vPath;
-			m_vPath.clear();
+			//m_vCompletePath.clear();
+			//m_vCompletePath = m_vPath;
+			//m_vPath.clear();
 
 			m_bIsPathfindingComplete = true;
 
