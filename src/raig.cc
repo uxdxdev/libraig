@@ -46,12 +46,13 @@ public:
 	RaigImpl();
 	~RaigImpl();
 
-	int InitConnection(char *hostname, char *service);
+	int InitConnection(std::string hostname, std::string service);
 
-	void CreateGameWorld(int size);
+	void CreateGameWorld(int size, AiService serviceType);
 
 	void SetCellOpen(Vector3 cell);
 	void SetCellBlocked(Vector3 cell);
+	void ReSendBlockedList();
 
 	// Find a path using A* from source to destination
 	void FindPath(Vector3 *start, Vector3 *goal);
@@ -99,8 +100,8 @@ public:
 	bool m_bIsPathfindingComplete;
 
 	enum State{
-		IDLE,
-		PROCESSING
+		CONNECTED,
+		CONNECTION_FAILED,
 	};
 
 	enum PacketCode{
@@ -119,6 +120,13 @@ public:
 
 	std::vector<std::unique_ptr<Vector3> > m_vBlockedCells;
 
+	// Game data used for re-connection attempts;
+	std::string m_strHostname;
+	std::string m_strService;
+	int m_iGameWorldSize;
+	AiService m_ServiceType;
+
+	int m_iReconnectionAttempts;
 };
 
 /*
@@ -132,14 +140,14 @@ Raig::~Raig()
 {
 }
 
-int Raig::InitConnection(char *hostname, char *service)
+int Raig::InitConnection(std::string hostname, std::string service)
 {
 	return m_Impl->InitConnection(hostname, service);
 }
 
-void Raig::CreateGameWorld(int size)
+void Raig::CreateGameWorld(int size, AiService serviceType)
 {
-	m_Impl->CreateGameWorld(size);
+	m_Impl->CreateGameWorld(size, serviceType);
 }
 
 void Raig::SetCellOpen(Vector3 cell)
@@ -193,11 +201,12 @@ void Raig::Update()
 Raig::RaigImpl::RaigImpl()
 {
 	m_iProtocolId = 23061912; // Turing
-	m_eState = IDLE;
+	m_eState = CONNECTION_FAILED;
 	m_iSocketFileDescriptor = -1;
 	m_iSentSequence = 0;
 	m_iRecvSequence = -1; // Start counting from -1
 	m_bIsPathfindingComplete = true;
+	m_iReconnectionAttempts = 0;
 }
 
 Raig::RaigImpl::~RaigImpl()
@@ -207,92 +216,143 @@ Raig::RaigImpl::~RaigImpl()
 
 // Libsocket wrapper functions to abstract the library and reduce coupling
 // Wrapper for libsocket Connection() that creates a peer connection based on the
-int Raig::RaigImpl::InitConnection(char *hostname, char *service)
+int Raig::RaigImpl::InitConnection(std::string hostname, std::string service)
 {
+	// Store hostname and service for reconnection attempts
+	m_strHostname = hostname;
+	m_strService = service;
+
 	// Initialize connection to the raig server
-	m_iSocketFileDescriptor = Connection(hostname, service, TYPE_CLIENT, SOCK_STREAM);
+	m_iSocketFileDescriptor = Connection(m_strHostname.c_str(), m_strService.c_str(), TYPE_CLIENT, SOCK_STREAM);
+
+	if(m_iSocketFileDescriptor == -1)
+	{
+		m_eState = CONNECTION_FAILED;
+		//printf("InitConnection() Connection failed. Socketfd %d\n", m_iSocketFileDescriptor);
+		return -1;
+	}
+
+	m_eState = CONNECTED;
 
 	SetNonBlocking(m_iSocketFileDescriptor);
 
 	return m_iSocketFileDescriptor;
 }
 
-void Raig::RaigImpl::CreateGameWorld(int size)
+void Raig::RaigImpl::CreateGameWorld(int size, AiService serviceType)
 {
-	sprintf(m_cSendBuffer, "%02d_%03d_000000000000", RaigImpl::GAMEWORLD, size);
-	sendBuffer();
+	// Store initial game world size and service type for re-connection attempts
+	m_iGameWorldSize = size;
+	m_ServiceType = serviceType;
+
+	if(m_eState == CONNECTED)
+	{
+		sprintf(m_cSendBuffer, "%02d_%03d_%02d_000000000", RaigImpl::GAMEWORLD, size, serviceType);
+		sendBuffer();
+	}
 }
 
 void Raig::RaigImpl::SetCellOpen(Vector3 openCell)
 {
+	// Search blocked cells vector and remove the openCell if it was found
+	// Time complexity O(N)
 	for(int i = 0; i <= m_vBlockedCells.size(); i++)
 	{
 		if(!m_vBlockedCells.empty())
 		{
-			printf("Cell blocked list: X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ);
+			//printf("Cell blocked list: X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ);
 			if(m_vBlockedCells[i]->Compare(&openCell))
 			{
-				printf("Cell X:%d Z:%d == Cell X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ, openCell.m_iX, openCell.m_iZ);
+				//printf("Cell X:%d Z:%d == Cell X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ, openCell.m_iX, openCell.m_iZ);
 				m_vBlockedCells.erase(m_vBlockedCells.begin() + i);
 				if(m_vBlockedCells.empty())
 				{
-					printf("Blocked cells list empty\n");
+					//printf("Blocked cells list empty\n");
 				}
 			}
 		}
 		else
 		{
-			printf("Blocked cells list empty\n");
+			//printf("Blocked cells list empty\n");
 		}
 	}
 
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
-	printf("Cell X:%d Y:%d Z:%d opened - buffer : %s\n", openCell.m_iX, openCell.m_iY, openCell.m_iZ, m_cSendBuffer);
-	sendBuffer();
+	if(m_eState == CONNECTED)
+	{
+		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
+		//printf("Cell X:%d Y:%d Z:%d opened - buffer : %s\n", openCell.m_iX, openCell.m_iY, openCell.m_iZ, m_cSendBuffer);
+		sendBuffer();
+	}
 }
 
 void Raig::RaigImpl::SetCellBlocked(Vector3 cell)
 {
 	// Add blocked cell to vector
 	m_vBlockedCells.push_back(std::unique_ptr<Vector3>(new Vector3(cell)));
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
-	printf("Cell X:%d Y:%d Z:%d blocked - buffer : %s\n", cell.m_iX, cell.m_iY, cell.m_iZ, m_cSendBuffer);
-	sendBuffer();
+
+	if(m_eState == CONNECTED)
+	{
+		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
+		//printf("Cell X:%d Y:%d Z:%d blocked - buffer : %s\n", cell.m_iX, cell.m_iY, cell.m_iZ, m_cSendBuffer);
+		sendBuffer();
+	}
+}
+
+void Raig::RaigImpl::ReSendBlockedList()
+{
+	if(m_eState == CONNECTED)
+	{
+		printf("ReSendingBlockedList\n");
+		for(int i = 0; i < m_vBlockedCells.size(); i++)
+		{
+			if(!m_vBlockedCells.empty())
+			{
+				sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_BLOCKED, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
+				//printf("Cell X:%d Y:%d Z:%d blocked - buffer : %s\n", cell.m_iX, cell.m_iY, cell.m_iZ, m_cSendBuffer);
+				sendBuffer();
+			}
+		}
+
+		printf("Blocked list re-sent to RAIG\n");
+	}
 }
 
 void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
 {
-	if(!IsPathfindingComplete())
+	if(m_eState == CONNECTED)
 	{
-		return;
-	}
-
-	printf("Find path start (%d, %d, %d) : goal (%d, %d, %d)\n", start->m_iX, start->m_iY, start->m_iZ, goal->m_iX, goal->m_iY, goal->m_iZ);
-
-	if(!m_vBlockedCells.empty())
-	{
-		for(int i = 0; i < m_vBlockedCells.size(); i++)
+		if(!IsPathfindingComplete())
 		{
-			if(m_vBlockedCells[i]->Compare(start) || m_vBlockedCells[i]->Compare(goal))
+			return;
+		}
+
+		//printf("Find path start (%d, %d, %d) : goal (%d, %d, %d)\n", start->m_iX, start->m_iY, start->m_iZ, goal->m_iX, goal->m_iY, goal->m_iZ);
+
+		if(!m_vBlockedCells.empty())
+		{
+			for(int i = 0; i < m_vBlockedCells.size(); i++)
 			{
-				printf("Invalid path, start or end goal is blocked\n");
-				return;
+				if(m_vBlockedCells[i]->Compare(start) || m_vBlockedCells[i]->Compare(goal))
+				{
+					//printf("Invalid path, start or end goal is blocked\n");
+					return;
+				}
 			}
 		}
+
+		//printf("Blocked cells vector checked, sending request\n");
+
+		// Store path query data in the system buffer so
+		// it can be sent on the next update
+		m_iSentSequence++;
+		m_bIsPathfindingComplete = false;
+		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
+		sendBuffer();
+		//m_vCompletePath.clear();
+		m_vPath.clear();
+
+		//printf("Path query sent OK\n");
 	}
-
-	printf("Blocked cells vector checked, sending request\n");
-
-	// Store path query data in the system buffer so
-	// it can be sent on the next update
-	m_iSentSequence++;
-	m_bIsPathfindingComplete = false;
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
-	sendBuffer();
-	//m_vCompletePath.clear();
-	m_vPath.clear();
-
-	printf("Path query sent OK\n");
 }
 
 std::vector<std::shared_ptr<Vector3> > Raig::RaigImpl::GetPath()
@@ -317,17 +377,19 @@ int Raig::RaigImpl::sendBuffer()
 	int flags = 0;
 	int bytesSents = 0;
 
-	//printf("Buffer: %s\n", m_cBuffer);
+	// If Client state == State::CONNECTED
+
 	bytesSents = Send(m_iSocketFileDescriptor, m_cSendBuffer, size, flags);
-	printf("Buffer: %s\n", m_cSendBuffer);
+
+	//printf("Send() Socketfd : %d Buffer: %s\n", m_iSocketFileDescriptor, m_cSendBuffer);
 	ClearBuffer();
+
 	return bytesSents;
 }
 
 // Receive data from the connected server using recvfrom()
 int Raig::RaigImpl::ReadBuffer()
 {
-	//printf("Called ReadBuffer()\n");
 	int size = sizeof(m_cRecvBuffer);
 	int bufferSpace = size;
 
@@ -337,30 +399,70 @@ int Raig::RaigImpl::ReadBuffer()
 	int continueReading = 1;
 
 	do{
+		//printf("ReadBuffer() loop...\n");
 		bytesRecv = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
+
+		if(bytesRecv == -1 && m_eState == CONNECTED)
+		{
+			// Non blocking socket returns -1 if there is no data to read
+			// in the buffer. Returns 0 on shutdown.
+			//printf("Called ReadBuffer() bytes: %d\n", bytesRecv);
+			break;
+		}
+
+		// Server shutdown connection
+		if(bytesRecv == 0 && m_eState == CONNECTED)
+		{
+			//printf("ReadBuffer() Bytes received : %d\n", bytesRecv);
+			// Server has shutdown the connection
+			m_eState = CONNECTION_FAILED;
+		}
+
+		// Initial connection failed
+		// TODO: Implement re-connection attempts
+		if(m_eState == CONNECTION_FAILED)
+		{
+			// Re-connection attempt failed
+			//printf("Trying to reconnect to server\n");
+			InitConnection(m_strHostname, m_strService);
+
+			if(m_eState == CONNECTED)
+			{
+				// Re-connection successful, send RAIG game world size and service
+				// type used initially
+				printf("Re-connection successful\n");
+				CreateGameWorld(m_iGameWorldSize, m_ServiceType);
+				ReSendBlockedList();
+				m_bIsPathfindingComplete = true;
+				break;
+			}
+
+			break;
+		}
+
 
 		if(bytesRecv > 0 && bytesRecv < MAX_BUFFER_SIZE)
 		{
-			printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
+			//printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
 			size -= bytesRecv;
 
 			if(size > 0)
 			{
 				strcat(temp, m_cRecvBuffer);
 				temp[bytesRecv] = '\0';
-				printf("strcat() temp : %s m_cRecvBuffer : %s\n", temp, m_cRecvBuffer);
+				//printf("strcat() temp : %s m_cRecvBuffer : %s\n", temp, m_cRecvBuffer);
 			}
 			else
 			{
 				strcat(temp, m_cRecvBuffer);
 				strcpy(m_cRecvBuffer, temp);
-				printf("strcpy() m_cRecvBuffer : %s temp : %s \n", m_cRecvBuffer, temp);
+				//printf("strcpy() m_cRecvBuffer : %s temp : %s \n", m_cRecvBuffer, temp);
 			}
-			printf("bytes left to read: %d temp buffer: %s\n", size, temp);
+			//printf("bytes left to read: %d temp buffer: %s\n", size, temp);
 		}
 		else if(bytesRecv > 0)
 		{
-			printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
+			//printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
 			size -= bytesRecv;
 		}
 
@@ -391,11 +493,16 @@ void Raig::RaigImpl::readData(struct Packet *packet)
 
 void Raig::RaigImpl::update()
 {
+	// Read messages from the server
+	// Incoming messages
+	int returnVal = ReadBuffer();
+	if(returnVal <= 0)
+	{
+		return;
+	}
+
 	if(!m_bIsPathfindingComplete)
 	{
-		// Read messages from the server
-		ReadBuffer();
-
 		char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
 		int statusCode = atoi(statusFlag); // Convert to integer
 
@@ -445,8 +552,6 @@ void Raig::RaigImpl::update()
 			//m_vPath.clear();
 
 			m_bIsPathfindingComplete = true;
-
-			m_eState = IDLE;
 			ClearBuffer();
 		}
 	}

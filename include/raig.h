@@ -43,17 +43,26 @@ struct Packet
 	int completeFlag;
 };
 
+// Ai services available to clients
+enum AiService{
+	ASTAR,
+	FSM,
+	BFS,
+	DFS
+};
+
 class Raig
 {
 public:
 	Raig();
 	~Raig();
 
-	int InitConnection(char *hostname, char *service);
+	int InitConnection(std::string hostname, std::string service);
 
-	void CreateGameWorld(int size);
+	void CreateGameWorld(int size, AiService serviceType);
 
 	void SetCellOpen(Vector3 cell);
+
 	void SetCellBlocked(Vector3 cell);
 
 	// Store the path in a vector of x, y coordinate locations
