@@ -35,34 +35,33 @@ SOFTWARE.
 
 namespace raig{
 
-struct Packet
-{
-	char stringData[255];
-	int x;
-	int y;
-	int completeFlag;
-};
-
 class Raig
 {
 public:
+	// Ai services available to clients
+	enum AiService{
+		ASTAR,
+		FSM,
+		BFS,
+		DFS
+	};
+
 	Raig();
-	~Raig();
 
-	int InitConnection(char *hostname, char *service);
+	int InitConnection(std::string hostname, std::string service);
 
-	void CreateGameWorld(int size);
+	void CreateGameWorld(int size, AiService serviceType);
+
+	void SetCellOpen(Vector3 cell);
+
+	void SetCellBlocked(Vector3 cell);
 
 	// Store the path in a vector of x, y coordinate locations
-	void FindPath(int sourceX, int sourceY, int destinationX, int destinationY);
+	void FindPath(Vector3 *start, Vector3 *goal);
 
-	std::vector<std::shared_ptr<Vector3> > *GetPath();
+	std::vector<std::shared_ptr<Vector3> > GetPath();
 
 	bool IsPathfindingComplete();
-
-	void SendData(struct Packet* packet);
-
-	void ReadData(struct Packet* packet);
 
 	void Update();
 
