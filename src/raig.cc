@@ -25,11 +25,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
-#include <string>
+#include "../include/raig.h" // API
+#include <algorithm> // std::reverse()
+#include <cstring> // strlen(), strcat(), strtok(), strcpy()
 
-#include "../include/raig.h" // API for developers
-#include <algorithm>
-#include <cstring>
 extern "C" {
 	#include "../external/libsocket/include/socket.h"
 }
@@ -38,12 +37,12 @@ using namespace raig;
 
 #define MAX_BUFFER_SIZE 13
 
-// RaigImpl class declaration
 class Raig::RaigImpl
 {
 public:
 
 	RaigImpl();
+
 	~RaigImpl();
 
 	int InitConnection(std::string hostname, std::string service);
@@ -51,7 +50,9 @@ public:
 	void CreateGameWorld(int size, AiService serviceType);
 
 	void SetCellOpen(Vector3 cell);
+
 	void SetCellBlocked(Vector3 cell);
+
 	void ReSendBlockedList();
 
 	// Find a path using A* from source to destination
@@ -62,43 +63,10 @@ public:
 
 	bool IsPathfindingComplete();
 
-	// send buffer to the server
-	int sendBuffer();
-
-	// read data from the network into the buffer
-	int ReadBuffer();
-
-	void ClearBuffer();
-
-	// Send packet data
-	void sendData(struct Packet* packet);
-
-	// Read packet data
-	void readData(struct Packet* packet);
-
 	// Update the raig engine
-	void update();
+	void Update();
 
-	// Private members and functions
-	void cleanUp();
-
-	// Connection socket descriptor
-	int m_iSocketFileDescriptor;
-
-	// Network buffer
-	char m_cSendBuffer[MAX_BUFFER_SIZE];
-
-	char m_cRecvBuffer[MAX_BUFFER_SIZE];
-
-	// vector of locations
-	std::vector<std::shared_ptr<Vector3> > m_vPath;
-	std::vector<std::shared_ptr<Vector3> > m_vCompletePath;
-
-	int m_iSentSequence;
-	int m_iRecvSequence;
-
-	bool m_bIsPathfindingComplete;
-
+private:
 	enum State{
 		CONNECTED,
 		CONNECTION_FAILED,
@@ -114,6 +82,32 @@ public:
 		CELL_OPEN
 	};
 
+	// send buffer to the server
+	int SendBuffer();
+
+	// read data from the network into the buffer
+	int ReadBuffer();
+
+	void ClearBuffer();
+
+	// Private members and functions
+	void CleanUp();
+
+	// Connection socket descriptor
+	int m_iSocketFileDescriptor;
+
+	// Network buffer
+	char m_cSendBuffer[MAX_BUFFER_SIZE];
+
+	char m_cRecvBuffer[MAX_BUFFER_SIZE];
+
+	// vector of locations
+	std::vector<std::shared_ptr<Vector3> > m_vPath;
+
+	int m_iRecvSequence;
+
+	bool m_bIsPathfindingComplete;
+
 	int m_iProtocolId;
 
 	State m_eState;
@@ -125,18 +119,12 @@ public:
 	std::string m_strService;
 	int m_iGameWorldSize;
 	AiService m_ServiceType;
-
-	int m_iReconnectionAttempts;
 };
 
 /*
  *  Raig class implementation
  */
 Raig::Raig() : m_Impl(new RaigImpl())
-{
-}
-
-Raig::~Raig()
 {
 }
 
@@ -160,7 +148,6 @@ void Raig::SetCellBlocked(Vector3 cell)
 	m_Impl->SetCellBlocked(cell);
 }
 
-
 void Raig::FindPath(Vector3 *start, Vector3 *goal)
 {
 	m_Impl->FindPath(start, goal);
@@ -176,46 +163,28 @@ bool Raig::IsPathfindingComplete()
 	return m_Impl->IsPathfindingComplete();
 }
 
-void Raig::SendData(struct Packet* packet)
-{
-	m_Impl->sendData(packet);
-}
-
-void Raig::ReadData(struct Packet* packet)
-{
-	m_Impl->readData(packet);
-}
-
 void Raig::Update()
 {
-	m_Impl->update();
+	m_Impl->Update();
 }
-
-
-
 
 /*
  * RaigImpl implementation
  */
-
 Raig::RaigImpl::RaigImpl()
 {
 	m_iProtocolId = 23061912; // Turing
 	m_eState = CONNECTION_FAILED;
 	m_iSocketFileDescriptor = -1;
-	m_iSentSequence = 0;
 	m_iRecvSequence = -1; // Start counting from -1
 	m_bIsPathfindingComplete = true;
-	m_iReconnectionAttempts = 0;
 }
 
 Raig::RaigImpl::~RaigImpl()
 {
-	cleanUp();
+	CleanUp();
 }
 
-// Libsocket wrapper functions to abstract the library and reduce coupling
-// Wrapper for libsocket Connection() that creates a peer connection based on the
 int Raig::RaigImpl::InitConnection(std::string hostname, std::string service)
 {
 	// Store hostname and service for reconnection attempts
@@ -231,9 +200,7 @@ int Raig::RaigImpl::InitConnection(std::string hostname, std::string service)
 		//printf("InitConnection() Connection failed. Socketfd %d\n", m_iSocketFileDescriptor);
 		return -1;
 	}
-
 	m_eState = CONNECTED;
-
 	SetNonBlocking(m_iSocketFileDescriptor);
 
 	return m_iSocketFileDescriptor;
@@ -248,7 +215,7 @@ void Raig::RaigImpl::CreateGameWorld(int size, AiService serviceType)
 	if(m_eState == CONNECTED)
 	{
 		sprintf(m_cSendBuffer, "%02d_%03d_%02d_000000000", RaigImpl::GAMEWORLD, size, serviceType);
-		sendBuffer();
+		SendBuffer();
 	}
 }
 
@@ -260,7 +227,6 @@ void Raig::RaigImpl::SetCellOpen(Vector3 openCell)
 	{
 		if(!m_vBlockedCells.empty())
 		{
-			//printf("Cell blocked list: X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ);
 			if(m_vBlockedCells[i]->Compare(&openCell))
 			{
 				//printf("Cell X:%d Z:%d == Cell X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ, openCell.m_iX, openCell.m_iZ);
@@ -281,7 +247,7 @@ void Raig::RaigImpl::SetCellOpen(Vector3 openCell)
 	{
 		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
 		//printf("Cell X:%d Y:%d Z:%d opened - buffer : %s\n", openCell.m_iX, openCell.m_iY, openCell.m_iZ, m_cSendBuffer);
-		sendBuffer();
+		SendBuffer();
 	}
 }
 
@@ -293,8 +259,7 @@ void Raig::RaigImpl::SetCellBlocked(Vector3 cell)
 	if(m_eState == CONNECTED)
 	{
 		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
-		//printf("Cell X:%d Y:%d Z:%d blocked - buffer : %s\n", cell.m_iX, cell.m_iY, cell.m_iZ, m_cSendBuffer);
-		sendBuffer();
+		SendBuffer();
 	}
 }
 
@@ -302,18 +267,15 @@ void Raig::RaigImpl::ReSendBlockedList()
 {
 	if(m_eState == CONNECTED)
 	{
-		printf("ReSendingBlockedList\n");
+		// Time complexity O(N) to send all cells in vector to RAIG server
 		for(int i = 0; i < m_vBlockedCells.size(); i++)
 		{
 			if(!m_vBlockedCells.empty())
 			{
 				sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigImpl::CELL_BLOCKED, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
-				//printf("Cell X:%d Y:%d Z:%d blocked - buffer : %s\n", cell.m_iX, cell.m_iY, cell.m_iZ, m_cSendBuffer);
-				sendBuffer();
+				SendBuffer();
 			}
 		}
-
-		printf("Blocked list re-sent to RAIG\n");
 	}
 }
 
@@ -321,13 +283,14 @@ void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
 {
 	if(m_eState == CONNECTED)
 	{
-		if(!IsPathfindingComplete())
+		if(!m_bIsPathfindingComplete)
 		{
+			// If the previous path request has not been completed
 			return;
 		}
 
-		//printf("Find path start (%d, %d, %d) : goal (%d, %d, %d)\n", start->m_iX, start->m_iY, start->m_iZ, goal->m_iX, goal->m_iY, goal->m_iZ);
-
+		// Check if the start of goal cell is a blocked cell
+		// Time complexity O(N)
 		if(!m_vBlockedCells.empty())
 		{
 			for(int i = 0; i < m_vBlockedCells.size(); i++)
@@ -340,15 +303,12 @@ void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
 			}
 		}
 
-		//printf("Blocked cells vector checked, sending request\n");
-
-		// Store path query data in the system buffer so
-		// it can be sent on the next update
-		m_iSentSequence++;
+		// Set the path complete flag to prevent more requests until this one is complete
 		m_bIsPathfindingComplete = false;
+
 		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
-		sendBuffer();
-		//m_vCompletePath.clear();
+		SendBuffer();
+
 		m_vPath.clear();
 
 		//printf("Path query sent OK\n");
@@ -357,12 +317,10 @@ void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
 
 std::vector<std::shared_ptr<Vector3> > Raig::RaigImpl::GetPath()
 {
-	// Return a copy of the completed path
-	//std::reverse(m_vCompletePath.begin(), m_vCompletePath.end());
+	// Return a copy of the completed path. Path vectors must be reversed because
+	// RAIG sends them from Goal to Start order
 	std::reverse(m_vPath.begin(), m_vPath.end());
-	std::vector<std::shared_ptr<Vector3> > temp(m_vPath);
-	m_vPath.clear();
-	return temp;
+	return m_vPath;
 }
 
 bool Raig::RaigImpl::IsPathfindingComplete()
@@ -370,56 +328,56 @@ bool Raig::RaigImpl::IsPathfindingComplete()
 	return m_bIsPathfindingComplete;
 }
 
-// Receive messages from the server using libsocket TODO: create wrapper in libsocket for revfrom()
-int Raig::RaigImpl::sendBuffer()
+int Raig::RaigImpl::SendBuffer()
 {
 	size_t size = strlen(m_cSendBuffer) + 1;
 	int flags = 0;
 	int bytesSents = 0;
 
-	// If Client state == State::CONNECTED
-
 	bytesSents = Send(m_iSocketFileDescriptor, m_cSendBuffer, size, flags);
-
-	//printf("Send() Socketfd : %d Buffer: %s\n", m_iSocketFileDescriptor, m_cSendBuffer);
 	ClearBuffer();
-
 	return bytesSents;
 }
 
-// Receive data from the connected server using recvfrom()
 int Raig::RaigImpl::ReadBuffer()
 {
 	int size = sizeof(m_cRecvBuffer);
 	int bufferSpace = size;
-
 	int flags = 0;
 	int bytesRecv = 0;
 	char temp[MAX_BUFFER_SIZE] = "\0";
 	int continueReading = 1;
 
+	// Continue to loop until full TCP segment has been received and parsed. The issue here is that
+	// a segment can contain the end of one vector packet and the beginning of another which causes an
+	// error when reading partial data. The solution was to only read the full size of a packet each time
+	// from the kernel buffer. If a partial packet was received at the end of a TCP segment, reduce the number
+	// of bytes read from the kernel buffer corresponding to the end of the previous segment packet data.
+	// Example:
+	//
+	//		20 Byte packet
+	//
+	//						TCP Segment 1				 | 				TCP Segment 2
+	//		| 		20 Bytes 	|		10 Bytes		~|~		10 Bytes	|		20 Bytes 	|
+	//
+	//
 	do{
-		//printf("ReadBuffer() loop...\n");
 		bytesRecv = Recv(m_iSocketFileDescriptor, m_cRecvBuffer, size, flags);
 
+		// Normal non-blocking receive when connected
 		if(bytesRecv == -1 && m_eState == CONNECTED)
 		{
 			// Non blocking socket returns -1 if there is no data to read
 			// in the buffer. Returns 0 on shutdown.
-			//printf("Called ReadBuffer() bytes: %d\n", bytesRecv);
 			break;
 		}
 
 		// Server shutdown connection
 		if(bytesRecv == 0 && m_eState == CONNECTED)
 		{
-			//printf("ReadBuffer() Bytes received : %d\n", bytesRecv);
-			// Server has shutdown the connection
 			m_eState = CONNECTION_FAILED;
 		}
 
-		// Initial connection failed
-		// TODO: Implement re-connection attempts
 		if(m_eState == CONNECTION_FAILED)
 		{
 			// Re-connection attempt failed
@@ -440,29 +398,23 @@ int Raig::RaigImpl::ReadBuffer()
 			break;
 		}
 
-
 		if(bytesRecv > 0 && bytesRecv < MAX_BUFFER_SIZE)
 		{
-			//printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
 			size -= bytesRecv;
 
 			if(size > 0)
 			{
 				strcat(temp, m_cRecvBuffer);
 				temp[bytesRecv] = '\0';
-				//printf("strcat() temp : %s m_cRecvBuffer : %s\n", temp, m_cRecvBuffer);
 			}
 			else
 			{
 				strcat(temp, m_cRecvBuffer);
 				strcpy(m_cRecvBuffer, temp);
-				//printf("strcpy() m_cRecvBuffer : %s temp : %s \n", m_cRecvBuffer, temp);
 			}
-			//printf("bytes left to read: %d temp buffer: %s\n", size, temp);
 		}
 		else if(bytesRecv > 0)
 		{
-			//printf("bytes received : %d buffer : %s\n\n", bytesRecv, m_cRecvBuffer);
 			size -= bytesRecv;
 		}
 
@@ -479,24 +431,9 @@ void Raig::RaigImpl::ClearBuffer()
 	sprintf(m_cRecvBuffer, "%d", RaigImpl::EMPTY);
 }
 
-void Raig::RaigImpl::sendData(struct Packet* packet)
+void Raig::RaigImpl::Update()
 {
-	// Send struct packet on the network
-	Write(m_iSocketFileDescriptor, packet, sizeof(Packet));
-}
-
-void Raig::RaigImpl::readData(struct Packet *packet)
-{
-	// Read network data into packet structure
-	Read(m_iSocketFileDescriptor, packet, sizeof(Packet));
-}
-
-void Raig::RaigImpl::update()
-{
-	// Read messages from the server
-	// Incoming messages
-	int returnVal = ReadBuffer();
-	if(returnVal <= 0)
+	if(ReadBuffer() <= 0)
 	{
 		return;
 	}
@@ -504,20 +441,18 @@ void Raig::RaigImpl::update()
 	if(!m_bIsPathfindingComplete)
 	{
 		char *statusFlag = strtok((char*)m_cRecvBuffer, "_");
-		int statusCode = atoi(statusFlag); // Convert to integer
+		int statusCode = atoi(statusFlag);
 
 		if(statusCode == RaigImpl::NODE)
 		{
-			//printf("NODE: %s\n", m_cRecvBuffer);
 			// Parse the buffer and construct the path vector
-			char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-			char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-			char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
+			char *nodeId = strtok((char*)NULL, "_");
+			char *nodeX = strtok((char*)NULL, "_");
+			char *nodeZ = strtok((char*)NULL, "_");
 
-			//std::string locationId(nodeId); // char array to string
-			int locationId = std::atoi(nodeId); // char array to int
-			int locationX = std::atoi(nodeX); // char array to int
-			int locationZ = std::atoi(nodeZ); // char array to int
+			int locationId = std::atoi(nodeId);
+			int locationX = std::atoi(nodeX);
+			int locationZ = std::atoi(nodeZ);
 
 			if(locationId == m_iRecvSequence)
 			{
@@ -526,86 +461,31 @@ void Raig::RaigImpl::update()
 			}
 			m_iRecvSequence = locationId;
 
-			// Add a location to the path vector
-			//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			// Add vector to the path
 			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
 			ClearBuffer();
 		}
 		else if(statusCode == RaigImpl::END)
 		{
-			//printf("END: %s\n", m_cRecvBuffer);
 			// Parse the buffer and add the final location to the path vector
-			char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-			char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-			char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
+			char *nodeId = strtok((char*)NULL, "_");
+			char *nodeX = strtok((char*)NULL, "_");
+			char *nodeZ = strtok((char*)NULL, "_");
 
-			//std::string locationId(nodeId); // char array to string
-			int locationId = std::atoi(nodeId); // char array to int
-			int locationX = std::atoi(nodeX); // char array to int
-			int locationZ = std::atoi(nodeZ); // char array to int
+			int locationId = std::atoi(nodeId);
+			int locationX = std::atoi(nodeX);
+			int locationZ = std::atoi(nodeZ);
 
-			// Add a location to the path vector
-			//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			// Add vector to the path
 			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-			//m_vCompletePath.clear();
-			//m_vCompletePath = m_vPath;
-			//m_vPath.clear();
-
 			m_bIsPathfindingComplete = true;
 			ClearBuffer();
 		}
 	}
-	/*
-	if(strcmp(statusFlag, "node") == 0)
-	{
-		// Parse the buffer and construct the path vector
-		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeZ = strtok((char*)NULL, "_"); // Y coordinate
-
-		//std::string locationId(nodeId); // char array to string
-		int locationId = std::atoi(nodeId); // char array to int
-		int locationX = std::atoi(nodeX); // char array to int
-		int locationZ = std::atoi(nodeZ); // char array to int
-
-
-		// Add a location to the path vector
-		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		ClearBuffer();
-	}
-	else if(strcmp(statusFlag, "done") == 0)
-	{
-		// Parse the buffer and add the final location to the path vector
-		char *nodeId = strtok((char*)NULL, "_"); // Tokenize the string using '_' as delimiter
-		char *nodeX = strtok((char*)NULL, "_"); // X coordinate
-		char *nodeZ = strtok((char*)NULL, "_"); // Z coordinate
-
-		//std::string locationId(nodeId); // char array to string
-		int locationId = std::atoi(nodeId); // char array to int
-		int locationX = std::atoi(nodeX); // char array to int
-		int locationZ = std::atoi(nodeZ); // char array to int
-
-		// Add a location to the path vector
-		//m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
-		m_vCompletePath.clear();
-		m_vCompletePath = m_vPath;
-		m_vPath.clear();
-
-		m_bIsPathfindingComplete = true;
-
-		m_eState = IDLE;
-		ClearBuffer();
-	}
-	*/
 }
 
-void Raig::RaigImpl::cleanUp()
+void Raig::RaigImpl::CleanUp()
 {
-	std::cout << "Raig::RaigImpl::cleanUp()" << std::endl;
-
 	m_vPath.clear();
-
 	close(m_iSocketFileDescriptor);
 }

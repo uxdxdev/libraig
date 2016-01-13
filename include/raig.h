@@ -35,27 +35,18 @@ SOFTWARE.
 
 namespace raig{
 
-struct Packet
-{
-	char stringData[255];
-	int x;
-	int y;
-	int completeFlag;
-};
-
-// Ai services available to clients
-enum AiService{
-	ASTAR,
-	FSM,
-	BFS,
-	DFS
-};
-
 class Raig
 {
 public:
+	// Ai services available to clients
+	enum AiService{
+		ASTAR,
+		FSM,
+		BFS,
+		DFS
+	};
+
 	Raig();
-	~Raig();
 
 	int InitConnection(std::string hostname, std::string service);
 
@@ -71,10 +62,6 @@ public:
 	std::vector<std::shared_ptr<Vector3> > GetPath();
 
 	bool IsPathfindingComplete();
-
-	void SendData(struct Packet* packet);
-
-	void ReadData(struct Packet* packet);
 
 	void Update();
 
