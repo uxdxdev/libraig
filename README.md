@@ -33,6 +33,6 @@ Libraries used in the project are built and installed using cmake. The `libsocke
 Libsocket is currently being used in the following projects:
 
 - RaigDemo  https://github.com/damorton/raig-demo.git
-- Raig-Cocos2dx-3D https://github.com/damorton/raig-cocos2dx-3D.git
+- Raig3D https://github.com/damorton/RAIG3D.git
 
 
