@@ -28,8 +28,6 @@ SOFTWARE.
 #ifndef _INCLUDE_VECTOR3_H_
 #define _INCLUDE_VECTOR3_H_
 
-#include <string>
-
 class Vector3{
 public:
 	int m_iX;
