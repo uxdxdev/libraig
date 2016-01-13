@@ -39,7 +39,11 @@ ExternalProject_Add(libsocket
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
 )
 
-set(SOURCES src/raig.cc)
+include_directories(
+	${CMAKE_SOURCE_DIR}/include	
+)
+
+set(SOURCES src/raig/raig_client.cc)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
