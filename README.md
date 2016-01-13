@@ -1,20 +1,18 @@
 # libraig
-Client API for R.A.I.G. 
-
-## Build
-```
-$ cmake .
-$ make 
-```
+Client API for R.A.I.G. server application. `libraig` facilitates communication between the game client and the remote RAIG server application by sending path requests and commands while receiving and processesing results. 
 
 ## Instructions
 - Download the repo
 - Extract to your third party library folder
-- `cd path/to/libraig-folder`
+- `cd libraig-master/`
 - Build
+```
+$ cmake .
+$ make 
+```
 - Link against the `libraig` dynamic library in the `lib/` folder. 
 
-To use the API don't forget to include the header file `include/raig.h`, and also connect to `damortonpi.duckdns.org` for testing. 
+To use the API don't forget to include the header file `include/raig.h` and link against the dynamic library in the `lib/` directory.
 
 ```
 m_RaigAI = new raig::Raig();
@@ -30,9 +28,9 @@ Libraries used in the project are built and installed using cmake. The `libsocke
 
 # Use cases
 
-Libsocket is currently being used in the following projects:
+Libraig is currently being used in the following projects:
 
-- RaigDemo  https://github.com/damorton/raig-demo.git
 - Raig3D https://github.com/damorton/RAIG3D.git
+- RaigDemo  https://github.com/damorton/raig-demo.git
 
 
