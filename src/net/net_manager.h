@@ -26,50 +26,58 @@ SOFTWARE.
 
 */
 
-#ifndef RAIG_RAIG_H
-#define RAIG_RAIG_H
+#ifndef NET_NET_MANAGER_H_
+#define NET_NET_MANAGER_H_
 
-#include <memory>
-#include <vector>
-#include <iostream>
-#include "base/vector3.h"
+namespace net{
 
-namespace raig{
+#define MAX_BUFFER_SIZE 13
 
-class Raig
-{
+class NetManager {
 public:
-	// Ai services available to clients
-	enum AiService{
-		ASTAR,
-		FSM,
-		BFS,
-		DFS
+	enum State{
+		CONNECTED,
+		CONNECTION_FAILED,
 	};
 
-	Raig();
+	enum PacketCode{
+		GAMEWORLD,
+		PATH,
+		NODE,
+		END,
+		EMPTY,
+		CELL_BLOCKED,
+		CELL_OPEN
+	};
+
+	NetManager();
 
 	int InitConnection(std::string hostname, std::string service);
 
-	void CreateGameWorld(int size, AiService serviceType);
-
-	void SetCellOpen(base::Vector3 cell);
-
-	void SetCellBlocked(base::Vector3 cell);
-
-	// Store the path in a vector of x, y coordinate locations
-	void FindPath(base::Vector3 *start, base::Vector3 *goal);
-
-	std::vector<std::shared_ptr<base::Vector3> > GetPath();
-
-	bool IsPathfindingComplete();
-
 	void Update();
 
+	// send buffer to the server
+	int SendBuffer();
+
+	// read data from the network into the buffer
+	int ReadBuffer();
+
 private:
-	class RaigImpl;
-	std::unique_ptr<RaigImpl> m_Impl;
+	void ClearBuffer();
+
+	// Private members and functions
+	void CleanUp();
+
+	// Connection socket descriptor
+	int m_iSocketFileDescriptor;
+
+	// Network buffer
+	char m_cSendBuffer[MAX_BUFFER_SIZE];
+
+	char m_cRecvBuffer[MAX_BUFFER_SIZE];
+
 };
 
-} // namespace raig
+}
+
 #endif

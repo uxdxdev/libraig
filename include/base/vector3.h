@@ -26,50 +26,60 @@ SOFTWARE.
 
 */
 
-#ifndef RAIG_RAIG_H
-#define RAIG_RAIG_H
+#ifndef BASE_VECTOR3_H_
+#define BASE_VECTOR3_H_
 
-#include <memory>
-#include <vector>
-#include <iostream>
-#include "base/vector3.h"
+namespace base{
 
-namespace raig{
-
-class Raig
-{
+class Vector3{
 public:
-	// Ai services available to clients
-	enum AiService{
-		ASTAR,
-		FSM,
-		BFS,
-		DFS
-	};
+	int m_iX;
+	int m_iY;
+	int m_iZ;
+	int m_iId;
 
-	Raig();
+	Vector3()
+	{
+		m_iX = 0;
+		m_iY = 0;
+		m_iZ = 0;
+		m_iId = 0;
+	}
 
-	int InitConnection(std::string hostname, std::string service);
+	Vector3(int x, int y, int z)
+	{
+		m_iX = x;
+		m_iY = y;
+		m_iZ = z;
+		m_iId = 0;
+	}
 
-	void CreateGameWorld(int size, AiService serviceType);
+	Vector3(int id, int x, int y, int z)
+	{
+		m_iX = x;
+		m_iY = y;
+		m_iZ = z;
+		m_iId = id;
+	}
 
-	void SetCellOpen(base::Vector3 cell);
+	int Compare(const Vector3 *other)
+	{
+		if(this->m_iX == other->m_iX && this->m_iY == other->m_iY && this->m_iZ == other->m_iZ)
+		{
+			return 1;
+		}
+		else
+		{
+			return 0;
+		}
+	}
 
-	void SetCellBlocked(base::Vector3 cell);
+	virtual ~Vector3()
+	{
 
-	// Store the path in a vector of x, y coordinate locations
-	void FindPath(base::Vector3 *start, base::Vector3 *goal);
-
-	std::vector<std::shared_ptr<base::Vector3> > GetPath();
-
-	bool IsPathfindingComplete();
-
-	void Update();
-
-private:
-	class RaigImpl;
-	std::unique_ptr<RaigImpl> m_Impl;
+	}
 };
 
-} // namespace raig
+} // namespace base
+
 #endif

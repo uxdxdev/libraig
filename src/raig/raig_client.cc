@@ -25,15 +25,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
+
 #include "raig/raig_client.h" // API
-#include <algorithm> // std::reverse()
-#include <cstring> // strlen(), strcat(), strtok(), strcpy()
 
 extern "C" {
 	#include "../external/libsocket/include/socket.h"
 }
 
-using namespace raig;
+#include <algorithm> // std::reverse()
+#include <cstring> // strlen(), strcat(), strtok(), strcpy()
+
+namespace raig {
 
 #define MAX_BUFFER_SIZE 13
 
@@ -49,17 +51,17 @@ public:
 
 	void CreateGameWorld(int size, AiService serviceType);
 
-	void SetCellOpen(Vector3 cell);
+	void SetCellOpen(base::Vector3 cell);
 
-	void SetCellBlocked(Vector3 cell);
+	void SetCellBlocked(base::Vector3 cell);
 
 	void ReSendBlockedList();
 
 	// Find a path using A* from source to destination
-	void FindPath(Vector3 *start, Vector3 *goal);
+	void FindPath(base::Vector3 *start, base::Vector3 *goal);
 
 	// Read the path data received by the server
-	std::vector<std::shared_ptr<Vector3> > GetPath();
+	std::vector<std::shared_ptr<base::Vector3> > GetPath();
 
 	bool IsPathfindingComplete();
 
@@ -102,7 +104,7 @@ private:
 	char m_cRecvBuffer[MAX_BUFFER_SIZE];
 
 	// vector of locations
-	std::vector<std::shared_ptr<Vector3> > m_vPath;
+	std::vector<std::shared_ptr<base::Vector3> > m_vPath;
 
 	int m_iRecvSequence;
 
@@ -112,7 +114,7 @@ private:
 
 	State m_eState;
 
-	std::vector<std::unique_ptr<Vector3> > m_vBlockedCells;
+	std::vector<std::unique_ptr<base::Vector3> > m_vBlockedCells;
 
 	// Game data used for re-connection attempts;
 	std::string m_strHostname;
@@ -138,22 +140,22 @@ void Raig::CreateGameWorld(int size, AiService serviceType)
 	m_Impl->CreateGameWorld(size, serviceType);
 }
 
-void Raig::SetCellOpen(Vector3 cell)
+void Raig::SetCellOpen(base::Vector3 cell)
 {
 	m_Impl->SetCellOpen(cell);
 }
 
-void Raig::SetCellBlocked(Vector3 cell)
+void Raig::SetCellBlocked(base::Vector3 cell)
 {
 	m_Impl->SetCellBlocked(cell);
 }
 
-void Raig::FindPath(Vector3 *start, Vector3 *goal)
+void Raig::FindPath(base::Vector3 *start, base::Vector3 *goal)
 {
 	m_Impl->FindPath(start, goal);
 }
 
-std::vector<std::shared_ptr<Vector3> > Raig::GetPath()
+std::vector<std::shared_ptr<base::Vector3> > Raig::GetPath()
 {
 	return m_Impl->GetPath();
 }
@@ -173,6 +175,8 @@ void Raig::Update()
  */
 Raig::RaigImpl::RaigImpl()
 {
+	m_ServiceType = AiService::ASTAR; // default AStar
+	m_iGameWorldSize = 0;
 	m_iProtocolId = 23061912; // Turing
 	m_eState = CONNECTION_FAILED;
 	m_iSocketFileDescriptor = -1;
@@ -219,7 +223,7 @@ void Raig::RaigImpl::CreateGameWorld(int size, AiService serviceType)
 	}
 }
 
-void Raig::RaigImpl::SetCellOpen(Vector3 openCell)
+void Raig::RaigImpl::SetCellOpen(base::Vector3 openCell)
 {
 	// Search blocked cells vector and remove the openCell if it was found
 	// Time complexity O(N)
@@ -251,10 +255,10 @@ void Raig::RaigImpl::SetCellOpen(Vector3 openCell)
 	}
 }
 
-void Raig::RaigImpl::SetCellBlocked(Vector3 cell)
+void Raig::RaigImpl::SetCellBlocked(base::Vector3 cell)
 {
 	// Add blocked cell to vector
-	m_vBlockedCells.push_back(std::unique_ptr<Vector3>(new Vector3(cell)));
+	m_vBlockedCells.push_back(std::unique_ptr<base::Vector3>(new base::Vector3(cell)));
 
 	if(m_eState == CONNECTED)
 	{
@@ -279,7 +283,7 @@ void Raig::RaigImpl::ReSendBlockedList()
 	}
 }
 
-void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
+void Raig::RaigImpl::FindPath(base::Vector3 *start, base::Vector3 *goal)
 {
 	if(m_eState == CONNECTED)
 	{
@@ -315,7 +319,7 @@ void Raig::RaigImpl::FindPath(Vector3 *start, Vector3 *goal)
 	}
 }
 
-std::vector<std::shared_ptr<Vector3> > Raig::RaigImpl::GetPath()
+std::vector<std::shared_ptr<base::Vector3> > Raig::RaigImpl::GetPath()
 {
 	// Return a copy of the completed path. Path vectors must be reversed because
 	// RAIG sends them from Goal to Start order
@@ -462,7 +466,7 @@ void Raig::RaigImpl::Update()
 			m_iRecvSequence = locationId;
 
 			// Add vector to the path
-			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			m_vPath.push_back(std::shared_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
 			ClearBuffer();
 		}
 		else if(statusCode == RaigImpl::END)
@@ -477,7 +481,7 @@ void Raig::RaigImpl::Update()
 			int locationZ = std::atoi(nodeZ);
 
 			// Add vector to the path
-			m_vPath.push_back(std::shared_ptr<Vector3>(new Vector3(locationId, locationX, 0, locationZ)));
+			m_vPath.push_back(std::shared_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
 			m_bIsPathfindingComplete = true;
 			ClearBuffer();
 		}
@@ -489,3 +493,5 @@ void Raig::RaigImpl::CleanUp()
 	m_vPath.clear();
 	close(m_iSocketFileDescriptor);
 }
+
+} // namespace raig
