@@ -29,12 +29,15 @@ SOFTWARE.
 #ifndef NET_NET_MANAGER_H_
 #define NET_NET_MANAGER_H_
 
+#include <string> // string
+
 namespace net{
 
 #define MAX_BUFFER_SIZE 13
 
 class NetManager {
 public:
+
 	enum State{
 		CONNECTED,
 		CONNECTION_FAILED,
@@ -52,30 +55,38 @@ public:
 
 	NetManager();
 
-	int InitConnection(std::string hostname, std::string service);
+	int Init(std::string hostname, std::string service);
 
-	void Update();
+	State GetState(){ return m_eState; }
 
 	// send buffer to the server
-	int SendBuffer();
+	int SendData(char* buffer);
 
 	// read data from the network into the buffer
-	int ReadBuffer();
+	int ReadData(char* buffer, int size = MAX_BUFFER_SIZE);
 
 private:
+
 	void ClearBuffer();
 
 	// Private members and functions
 	void CleanUp();
 
+	bool m_bIsPathfindingComplete;
+
+	int m_iRecvSequence;
+
 	// Connection socket descriptor
 	int m_iSocketFileDescriptor;
 
-	// Network buffer
-	char m_cSendBuffer[MAX_BUFFER_SIZE];
+	State m_eState;
 
-	char m_cRecvBuffer[MAX_BUFFER_SIZE];
+	// Game data used for re-connection attempts;
+	std::string m_strHostname;
+	std::string m_strService;
 
+	char* m_SendBuffer;
+	char* m_ReadBuffer;
 };
 
 }

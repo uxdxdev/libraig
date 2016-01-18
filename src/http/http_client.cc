@@ -26,7 +26,7 @@ SOFTWARE.
 
 */
 
-#include "http/http_data_access.h"
+#include "http_client.h"
 
 namespace http{
 
