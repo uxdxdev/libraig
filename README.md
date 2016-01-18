@@ -1,5 +1,5 @@
 # libraig
-Client API for R.A.I.G. server application. `libraig` facilitates communication between the game client and the remote RAIG server application by sending path requests and commands while receiving and processesing results. 
+Client API for R.A.I.G. server application. `libraig` facilitates communication between the game client and the remote RAIG server application by sending path requests and commands while receiving and processing results. 
 
 ## Instructions
 - Download the repo
