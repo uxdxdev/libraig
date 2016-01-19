@@ -16,7 +16,7 @@ To use the API don't forget to include the header file `include/raig.h` and link
 
 ```
 m_RaigAI = new raig::Raig();
-m_RaigAI->InitConnection("damortonpi.duckdns.org", "27000");
+m_RaigAI->InitConnection("127.0.0.1", "27000");
 ```
 
 

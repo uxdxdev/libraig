@@ -67,14 +67,8 @@ public:
 
 private:
 
-	void ClearBuffer();
-
 	// Private members and functions
 	void CleanUp();
-
-	bool m_bIsPathfindingComplete;
-
-	int m_iRecvSequence;
 
 	// Connection socket descriptor
 	int m_iSocketFileDescriptor;
