@@ -26,50 +26,28 @@ SOFTWARE.
 
 */
 
-#ifndef RAIG_RAIG_H
-#define RAIG_RAIG_H
+#include "http_client.h"
 
-#include <memory>
-#include <vector>
-#include <iostream>
+namespace http{
 
-#include "base/vector3.h"
-
-namespace raig{
-
-class RaigClient
+void HttpDao::Create()
 {
-public:
 
-	// Ai services available to clients
-	enum AiService{
-		ASTAR,
-		FSM,
-		BFS,
-		DFS
-	};
+}
 
-	RaigClient();
+void HttpDao::Read()
+{
 
-	int InitConnection(std::string hostname, std::string service);
+}
 
-	void CreateGameWorld(int size, AiService serviceType);
+void HttpDao::Update()
+{
 
-	void SetCellOpen(base::Vector3 cell);
+}
 
-	void SetCellBlocked(base::Vector3 cell);
+void HttpDao::Delete()
+{
 
-	// Store the path in a vector of x, y coordinate locations
-	void FindPath(base::Vector3 *start, base::Vector3 *goal);
+}
 
-	std::vector<std::unique_ptr<base::Vector3> > &GetPath();
-
-	void Update();
-
-private:
-	class RaigClientImpl;
-	std::unique_ptr<RaigClientImpl> m_Impl;
-};
-
-} // namespace raig
-#endif
+} // namespace http

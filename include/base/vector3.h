@@ -26,50 +26,25 @@ SOFTWARE.
 
 */
 
-#ifndef RAIG_RAIG_H
-#define RAIG_RAIG_H
+#ifndef BASE_VECTOR3_H_
+#define BASE_VECTOR3_H_
 
-#include <memory>
-#include <vector>
-#include <iostream>
+namespace base{
 
-#include "base/vector3.h"
-
-namespace raig{
-
-class RaigClient
-{
+class Vector3{
 public:
+	int m_iX;
+	int m_iY;
+	int m_iZ;
+	int m_iId;
 
-	// Ai services available to clients
-	enum AiService{
-		ASTAR,
-		FSM,
-		BFS,
-		DFS
-	};
-
-	RaigClient();
-
-	int InitConnection(std::string hostname, std::string service);
-
-	void CreateGameWorld(int size, AiService serviceType);
-
-	void SetCellOpen(base::Vector3 cell);
-
-	void SetCellBlocked(base::Vector3 cell);
-
-	// Store the path in a vector of x, y coordinate locations
-	void FindPath(base::Vector3 *start, base::Vector3 *goal);
-
-	std::vector<std::unique_ptr<base::Vector3> > &GetPath();
-
-	void Update();
-
-private:
-	class RaigClientImpl;
-	std::unique_ptr<RaigClientImpl> m_Impl;
+	Vector3();
+	~Vector3();
+	Vector3(int x, int y, int z);
+	Vector3(int id, int x, int y, int z);
+	int Compare(const Vector3 *other);
 };
 
-} // namespace raig
+} // namespace base
+
 #endif

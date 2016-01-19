@@ -25,56 +25,64 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 */
-#ifndef RAIG_VECTOR3_H_
-#define RAIG_VECTOR3_H_
 
-class Vector3{
+#ifndef NET_NET_MANAGER_H_
+#define NET_NET_MANAGER_H_
+
+#include <string> // string
+
+namespace net{
+
+#define MAX_BUFFER_SIZE 13
+
+class NetManager {
 public:
-	int m_iX;
-	int m_iY;
-	int m_iZ;
-	int m_iId;
 
-	Vector3()
-	{
-		m_iX = 0;
-		m_iY = 0;
-		m_iZ = 0;
-		m_iId = 0;
-	}
+	enum State{
+		CONNECTED,
+		CONNECTION_FAILED,
+	};
 
-	Vector3(int x, int y, int z)
-	{
-		m_iX = x;
-		m_iY = y;
-		m_iZ = z;
-		m_iId = 0;
-	}
+	enum PacketCode{
+		GAMEWORLD,
+		PATH,
+		NODE,
+		END,
+		EMPTY,
+		CELL_BLOCKED,
+		CELL_OPEN
+	};
 
-	Vector3(int id, int x, int y, int z)
-	{
-		m_iX = x;
-		m_iY = y;
-		m_iZ = z;
-		m_iId = id;
-	}
+	NetManager();
 
-	int Compare(const Vector3 *other)
-	{
-		if(this->m_iX == other->m_iX && this->m_iY == other->m_iY && this->m_iZ == other->m_iZ)
-		{
-			return 1;
-		}
-		else
-		{
-			return 0;
-		}
-	}
+	int Init(std::string hostname, std::string service);
 
-	virtual ~Vector3()
-	{
+	State GetState(){ return m_eState; }
 
-	}
+	// send buffer to the server
+	int SendData(char* buffer);
+
+	// read data from the network into the buffer
+	int ReadData(char* buffer, int size = MAX_BUFFER_SIZE);
+
+private:
+
+	// Private members and functions
+	void CleanUp();
+
+	// Connection socket descriptor
+	int m_iSocketFileDescriptor;
+
+	State m_eState;
+
+	// Game data used for re-connection attempts;
+	std::string m_strHostname;
+	std::string m_strService;
+
+	char* m_SendBuffer;
+	char* m_ReadBuffer;
 };
+
+}
 
 #endif
