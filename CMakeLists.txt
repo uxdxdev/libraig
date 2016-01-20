@@ -50,13 +50,6 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
-if(UNIX AND NOT APPLE)
-  set(PROJECT_LINK_LIBS libsocket.so)
-else()
-  set(PROJECT_LINK_LIBS libsocket.dylib)
-endif()
-
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib/)
 
 link_directories(${CMAKE_BINARY_DIR}/external/libsocket/lib/)
 
@@ -64,8 +57,10 @@ add_library(raig SHARED ${SOURCES})
 
 add_dependencies(raig libsocket)
 
-target_link_libraries(raig ${PROJECT_LINK_LIBS})
+target_link_libraries(raig socket)
 
-install(TARGETS raig
-  LIBRARY DESTINATION lib
+set_target_properties(raig
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
