@@ -36,7 +36,6 @@ ExternalProject_Add(libsocket
     BINARY_DIR ${CMAKE_BINARY_DIR}/external/libsocket
     SOURCE_DIR ${CMAKE_BINARY_DIR}/external/libsocket
     INSTALL_COMMAND ""
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
 )
 
 include_directories(
@@ -50,14 +49,14 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
-
-link_directories(${CMAKE_BINARY_DIR}/external/libsocket/lib/)
+find_library(LIBSOCKET NAMES socket
+            PATHS ${CMAKE_BINARY_DIR}/external/libsocket/lib
+)
 
 add_library(raig SHARED ${SOURCES})
-
 add_dependencies(raig libsocket)
 
-target_link_libraries(raig socket)
+target_link_libraries(raig ${LIBSOCKET})
 
 set_target_properties(raig
     PROPERTIES
