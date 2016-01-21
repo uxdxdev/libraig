@@ -25,38 +25,23 @@
 # SOFTWARE.
 #
 # */
+cmake_policy(SET CMP0017 NEW)
 cmake_minimum_required(VERSION 2.8)
 project(libraig)
-include(ExternalProject)
-
-ExternalProject_Add(libsocket
-    PREFIX ${CMAKE_BINARY_DIR}/build/libsocket
-    GIT_REPOSITORY https://github.com/damorton/libsocket.git
-    GIT_TAG develop
-    BINARY_DIR ${CMAKE_BINARY_DIR}/external/libsocket
-    SOURCE_DIR ${CMAKE_BINARY_DIR}/external/libsocket
-    INSTALL_COMMAND ""
-)
 
 include_directories(
-	${CMAKE_SOURCE_DIR}/include
-	${CMAKE_SOURCE_DIR}/src	
+	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/src	
 )
-
 set(SOURCES src/raig/raig_client.cc src/base/vector3.cc src/net/net_manager.cc)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
-find_library(LIBSOCKET NAMES socket
-            PATHS ${CMAKE_BINARY_DIR}/external/libsocket/lib
-)
-
+add_subdirectory(external/libsocket)
 add_library(raig SHARED ${SOURCES})
-add_dependencies(raig libsocket)
-
-target_link_libraries(raig ${LIBSOCKET})
+target_link_libraries(raig socket)
 
 set_target_properties(raig
     PROPERTIES
