@@ -32,7 +32,7 @@ include(ExternalProject)
 ExternalProject_Add(libsocket
     PREFIX ${CMAKE_BINARY_DIR}/build/libsocket
     GIT_REPOSITORY https://github.com/damorton/libsocket.git
-    GIT_TAG master
+    GIT_TAG develop
     BINARY_DIR ${CMAKE_BINARY_DIR}/external/libsocket
     SOURCE_DIR ${CMAKE_BINARY_DIR}/external/libsocket
     INSTALL_COMMAND ""
@@ -62,5 +62,4 @@ set_target_properties(raig
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
 )
