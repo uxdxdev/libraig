@@ -1,6 +1,7 @@
 .DS_Store
 build/
 lib/
+external/
 CMakeCache.txt
 CMakeFiles/
 Makefile
@@ -9,3 +10,4 @@ libraig.*
 .cproject
 .project
 .settings
+*~

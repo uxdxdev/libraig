@@ -28,6 +28,17 @@
 cmake_policy(SET CMP0017 NEW)
 cmake_minimum_required(VERSION 2.8)
 project(libraig)
+include(ExternalProject)
+
+ExternalProject_Add(libsocket
+    PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build/libsocket
+    GIT_REPOSITORY https://github.com/damorton/libsocket.git
+    GIT_TAG master
+    BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket
+    INSTALL_COMMAND ""
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+)
 
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -39,7 +50,9 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
-add_subdirectory(external/libsocket)
+link_directories(
+	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
+)
 add_library(raig SHARED ${SOURCES})
 target_link_libraries(raig socket)
 
