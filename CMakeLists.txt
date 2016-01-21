@@ -53,7 +53,7 @@ endif()
 link_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
 )
-add_library(raig STATIC ${SOURCES})
+add_library(raig SHARED ${SOURCES})
 target_link_libraries(raig socket)
 
 set_target_properties(raig
