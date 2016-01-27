@@ -1,7 +1,5 @@
 .DS_Store
 build/
-lib/
-external/
 CMakeCache.txt
 CMakeFiles/
 Makefile
@@ -11,3 +9,5 @@ libraig.*
 .project
 .settings
 *~
+win-build
+libsocket

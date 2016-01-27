@@ -41,7 +41,7 @@ ExternalProject_Add(libsocket
 )
 
 include_directories(	
-	${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/include/linux
+	${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/include
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/src	
 )
@@ -49,7 +49,7 @@ set(SOURCES
 	src/client/raig_client.cc 
 	src/base/vector3.cc 
 	src/net/net_manager.cc
-	src/http/http_client.cc
+	#src/http/http_client.cc
 )
 
 if(CMAKE_COMPILER_IS_GNUCXX)
@@ -58,7 +58,7 @@ endif()
 
 link_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
-	${CMAKE_CURRENT_SOURCE_DIR}/external/curl/prebuilt/linux
+	${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/lib
 )
 add_library(raig SHARED ${SOURCES})
 target_link_libraries(raig socket)
@@ -67,4 +67,5 @@ set_target_properties(raig
     PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
 )

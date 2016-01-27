@@ -28,9 +28,8 @@ SOFTWARE.
 
 #include "raig/raig_client.h" // API
 
-extern "C" {
-	#include "../external/libsocket/include/socket.h"
-}
+#include "../external/libsocket/include/socket.h"
+
 
 #include <algorithm> // std::reverse()
 #include <cstring> // strlen(), strcat(), strtok(), strcpy()
