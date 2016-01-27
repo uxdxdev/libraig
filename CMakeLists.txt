@@ -46,7 +46,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/src	
 )
 set(SOURCES 
-	src/raig/raig_client.cc 
+	src/client/raig_client.cc 
 	src/base/vector3.cc 
 	src/net/net_manager.cc
 	src/http/http_client.cc
