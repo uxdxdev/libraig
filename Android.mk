@@ -20,7 +20,7 @@ LOCAL_MODULE := raig_shared
 
 LOCAL_MODULE_FILENAME := libraig
 
-LOCAL_SRC_FILES :=	$(LOCAL_PATH)/src/raig/raig_client.cc \
+LOCAL_SRC_FILES :=	$(LOCAL_PATH)/src/client/raig_client.cc \
 					$(LOCAL_PATH)/src/base/vector3.cc \
 					$(LOCAL_PATH)/src/net/net_manager.cc
 
