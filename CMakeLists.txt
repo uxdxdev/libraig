@@ -40,11 +40,17 @@ ExternalProject_Add(libsocket
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
 )
 
-include_directories(
+include_directories(	
+	${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/include/linux
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/src	
 )
-set(SOURCES src/raig/raig_client.cc src/base/vector3.cc src/net/net_manager.cc)
+set(SOURCES 
+	src/raig/raig_client.cc 
+	src/base/vector3.cc 
+	src/net/net_manager.cc
+	src/http/http_client.cc
+)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -52,6 +58,7 @@ endif()
 
 link_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
+	${CMAKE_CURRENT_SOURCE_DIR}/external/curl/prebuilt/linux
 )
 add_library(raig SHARED ${SOURCES})
 target_link_libraries(raig socket)

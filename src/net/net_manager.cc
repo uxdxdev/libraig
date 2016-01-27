@@ -39,7 +39,10 @@ namespace net{
 
 NetManager::NetManager()
 {
-
+	// Send data to web application
+	//std::unique_ptr<http::HttpDao> m_HttpDao (new http::HttpDao());
+	// user, password
+	//m_HttpDao->Create("David", "true");
 }
 
 int NetManager::Init(std::string hostname, std::string service)

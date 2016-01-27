@@ -26,14 +26,18 @@ SOFTWARE.
 
 */
 
-#ifndef HTTP_DATA_ACCESS_H
-#define HTTP_DATA_ACCESS_H
+#ifndef HTTP_CLIENT_H
+#define HTTP_CLIENT_H
+
+#include <memory>
+#include <string>
 
 namespace http{
 
 class HttpDao {
 public:
-	void Create();
+	HttpDao();
+	void Create(std::string username, std::string password);
 	void Read();
 	void Update();
 	void Delete();

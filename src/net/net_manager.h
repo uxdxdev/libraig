@@ -31,6 +31,8 @@ SOFTWARE.
 
 #include <string> // string
 
+#include "http/http_client.h"
+
 namespace net{
 
 #define MAX_BUFFER_SIZE 13
@@ -65,6 +67,8 @@ public:
 	// read data from the network into the buffer
 	int ReadData(char* buffer, int size = MAX_BUFFER_SIZE);
 
+	http::HttpDao *GetDao(){ return m_HttpDao.get(); }
+
 private:
 
 	// Private members and functions
@@ -81,6 +85,8 @@ private:
 
 	char* m_SendBuffer;
 	char* m_ReadBuffer;
+
+	std::unique_ptr<http::HttpDao> m_HttpDao;
 };
 
 }

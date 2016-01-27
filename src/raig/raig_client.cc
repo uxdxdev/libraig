@@ -280,6 +280,9 @@ void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *g
 		m_NetManager->SendData(m_cSendBuffer);
 		m_vPath.clear(); // Clear path storage
 
+		// Send message to web application
+		//m_NetManager->GetDao()->Create("raig_client", "true");
+
 		// Path request sent. Set the request complete flag to prevent more requests until this one is complete
 		m_bIsReqestComplete = false;
 	}
