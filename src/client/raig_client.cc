@@ -28,7 +28,7 @@ SOFTWARE.
 
 #include "raig/raig_client.h" // API
 
-#include "../external/libsocket/include/socket.h"
+#include "libsocket/include/socket.h"
 
 
 #include <algorithm> // std::reverse()
@@ -119,42 +119,42 @@ private:
 /*
  *  Raig class implementation
  */
-RaigClient::RaigClient()
+raig_EXPORT RaigClient::RaigClient()
 	: m_Impl(new RaigClientImpl())
 {
 }
 
-int RaigClient::InitConnection(std::string hostname, std::string service)
+int raig_EXPORT RaigClient::InitConnection(std::string hostname, std::string service)
 {
 	return m_Impl->InitConnection(hostname, service);
 }
 
-void RaigClient::CreateGameWorld(int size, AiService serviceType)
+void raig_EXPORT RaigClient::CreateGameWorld(int size, AiService serviceType)
 {
 	m_Impl->CreateGameWorld(size, serviceType);
 }
 
-void RaigClient::SetCellOpen(base::Vector3 cell)
+void raig_EXPORT RaigClient::SetCellOpen(base::Vector3 cell)
 {
 	m_Impl->SetCellOpen(cell);
 }
 
-void RaigClient::SetCellBlocked(base::Vector3 cell)
+void raig_EXPORT RaigClient::SetCellBlocked(base::Vector3 cell)
 {
 	m_Impl->SetCellBlocked(cell);
 }
 
-void RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
+void raig_EXPORT RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
 {
 	m_Impl->FindPath(start, goal);
 }
 
-std::vector<std::unique_ptr<base::Vector3> > &RaigClient::GetPath()
+std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &RaigClient::GetPath()
 {
 	return m_Impl->GetPath();
 }
 
-void RaigClient::Update()
+void raig_EXPORT RaigClient::Update()
 {
 	m_Impl->Update();
 }
@@ -389,7 +389,7 @@ void RaigClient::RaigClientImpl::CleanUp()
 	m_vPath.clear();
 	m_vBlockedCells.clear();
 	m_vCompletedPath.clear();
-	close(m_iSocketFileDescriptor);
+	Close(m_iSocketFileDescriptor);
 }
 
 } // namespace raig

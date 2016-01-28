@@ -29,6 +29,8 @@ SOFTWARE.
 #ifndef RAIG_RAIG_H
 #define RAIG_RAIG_H
 
+#include "raig_Export.h"
+
 #include <memory>
 #include <vector>
 #include <iostream>
@@ -49,22 +51,22 @@ public:
 		DFS
 	};
 
-	RaigClient();
+	raig_EXPORT RaigClient();
 
-	int InitConnection(std::string hostname, std::string service);
+	int raig_EXPORT InitConnection(std::string hostname, std::string service);
 
-	void CreateGameWorld(int size, AiService serviceType);
+	void raig_EXPORT CreateGameWorld(int size, AiService serviceType);
 
-	void SetCellOpen(base::Vector3 cell);
+	void raig_EXPORT SetCellOpen(base::Vector3 cell);
 
-	void SetCellBlocked(base::Vector3 cell);
+	void raig_EXPORT SetCellBlocked(base::Vector3 cell);
 
 	// Store the path in a vector of x, y coordinate locations
-	void FindPath(base::Vector3 *start, base::Vector3 *goal);
+	void raig_EXPORT FindPath(base::Vector3 *start, base::Vector3 *goal);
 
-	std::vector<std::unique_ptr<base::Vector3> > &GetPath();
+	std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &GetPath();
 
-	void Update();
+	void raig_EXPORT Update();
 
 private:
 	class RaigClientImpl;

@@ -29,6 +29,8 @@ cmake_policy(SET CMP0017 NEW)
 cmake_minimum_required(VERSION 2.8)
 project(libraig)
 include(ExternalProject)
+include (GenerateExportHeader)
+
 
 ExternalProject_Add(libsocket
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build/libsocket
@@ -41,7 +43,8 @@ ExternalProject_Add(libsocket
 )
 
 include_directories(	
-	${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/include
+	#${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/external
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${CMAKE_CURRENT_SOURCE_DIR}/src	
 )
@@ -58,10 +61,16 @@ endif()
 
 link_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
-	${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/lib
+	#${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/lib
 )
 add_library(raig SHARED ${SOURCES})
 target_link_libraries(raig socket)
+
+GENERATE_EXPORT_HEADER(raig
+             BASE_NAME raig
+             EXPORT_MACRO_NAME raig_EXPORT
+             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/raig/raig_Export.h
+)
 
 set_target_properties(raig
     PROPERTIES
