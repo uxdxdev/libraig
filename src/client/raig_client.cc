@@ -28,12 +28,11 @@ SOFTWARE.
 
 #include "raig/raig_client.h" // API
 
-#include "libsocket/include/socket.h"
-
-
 #include <algorithm> // std::reverse()
 #include <cstring> // strlen(), strcat(), strtok(), strcpy()
-#include <memory>
+#include <memory> // unique_ptr<>()
+
+#include "libsocket/include/socket.h" // libsocket
 
 #include "net/net_manager.h"
 

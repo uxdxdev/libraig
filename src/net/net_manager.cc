@@ -28,12 +28,10 @@ SOFTWARE.
 
 #include "net/net_manager.h"
 
-extern "C" {
-	#include "../external/libsocket/include/socket.h"
-}
-
 #include <cstring> // strlen()
 #include <iostream>
+
+#include "libsocket/include/socket.h" // libsocket
 
 namespace net{
 

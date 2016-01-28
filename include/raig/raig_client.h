@@ -61,7 +61,6 @@ public:
 
 	void raig_EXPORT SetCellBlocked(base::Vector3 cell);
 
-	// Store the path in a vector of x, y coordinate locations
 	void raig_EXPORT FindPath(base::Vector3 *start, base::Vector3 *goal);
 
 	std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &GetPath();
