@@ -32,7 +32,7 @@ SOFTWARE.
 
 namespace base{
 
-Vector3::Vector3()
+raig_EXPORT Vector3::Vector3()
 {
 	m_iX = 0;
 	m_iY = 0;
@@ -40,11 +40,11 @@ Vector3::Vector3()
 	m_iId = 0;
 }
 
-Vector3::~Vector3()
+raig_EXPORT Vector3::~Vector3()
 {
 }
 
-Vector3::Vector3(int x, int y, int z)
+raig_EXPORT Vector3::Vector3(int x, int y, int z)
 {
 	m_iX = x;
 	m_iY = y;
@@ -52,7 +52,7 @@ Vector3::Vector3(int x, int y, int z)
 	m_iId = 0;
 }
 
-Vector3::Vector3(int id, int x, int y, int z)
+raig_EXPORT Vector3::Vector3(int id, int x, int y, int z)
 {
 	m_iX = x;
 	m_iY = y;
@@ -60,7 +60,7 @@ Vector3::Vector3(int id, int x, int y, int z)
 	m_iId = id;
 }
 
-int Vector3::Compare(const Vector3 *other)
+int raig_EXPORT Vector3::Compare(const Vector3 *other)
 {
 	if(this->m_iX == other->m_iX && this->m_iY == other->m_iY && this->m_iZ == other->m_iZ)
 	{

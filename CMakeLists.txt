@@ -69,7 +69,7 @@ target_link_libraries(raig socket)
 GENERATE_EXPORT_HEADER(raig
              BASE_NAME raig
              EXPORT_MACRO_NAME raig_EXPORT
-             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/raig/raig_Export.h
+             EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/export/raig_Export.h
 )
 
 set_target_properties(raig

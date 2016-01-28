@@ -29,7 +29,7 @@ SOFTWARE.
 #ifndef RAIG_RAIG_H
 #define RAIG_RAIG_H
 
-#include "raig_Export.h"
+#include "export/raig_Export.h"
 
 #include <memory>
 #include <vector>
