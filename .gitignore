@@ -10,7 +10,6 @@ cmake_install.cmake
 *~
 ALL_BUILD.vcxproj
 ALL_BUILD.vcxproj.filters
-Win32/
 ZERO_CHECK.vcxproj
 ZERO_CHECK.vcxproj.filters
 raig.dir/
@@ -22,3 +21,4 @@ libraig.v12.suo
 libsocket.vcxproj
 libsocket.vcxproj.filters
 libraig.opensdf
+Debug/
