@@ -34,7 +34,7 @@ include (GenerateExportHeader)
 
 ExternalProject_Add(libsocket
     PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build/libsocket
-    GIT_REPOSITORY https://github.com/damorton/libsocket.git
+    GIT_REPOSITORY https://damorton@bitbucket.org/damorton/libsocket.git
     GIT_TAG windows
     BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket
@@ -59,12 +59,17 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 endif()
 
+if(WIN32)
+  set(CMAKE_C_FLAGS "/ZW")
+endif()
+
 link_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
 	#${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/lib
 )
 add_library(raig SHARED ${SOURCES})
 target_link_libraries(raig socket)
+add_dependencies(raig socket)
 
 GENERATE_EXPORT_HEADER(raig
              BASE_NAME raig
