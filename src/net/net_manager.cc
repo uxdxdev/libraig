@@ -43,16 +43,16 @@ NetManager::NetManager()
 	//m_HttpDao->Create("David", "true");
 }
 
-int NetManager::Init(std::string hostname, std::string service)
+int NetManager::Init(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service)
 {
-	printf("hostname: %s server: %s\n", hostname.c_str(), service.c_str());
+	printf("hostname: %s server: %s\n", hostname.get()->c_str(), service.get()->c_str());
 	// Store hostname and service for reconnection attempts
 	m_strHostname = hostname;
 	m_strService = service;
 
 	// Initialize connection to the raig server
 	// TODO: give libsocket a namespace
-	m_iSocketFileDescriptor = Connection(m_strHostname.c_str(), m_strService.c_str(), TYPE_CLIENT, SOCK_STREAM);
+	m_iSocketFileDescriptor = Connection(m_strHostname.get()->c_str(), m_strService.get()->c_str(), TYPE_CLIENT, SOCK_STREAM);
 
 	if(m_iSocketFileDescriptor == -1)
 	{

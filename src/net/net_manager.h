@@ -57,7 +57,7 @@ public:
 
 	NetManager();
 
-	int Init(std::string hostname, std::string service);
+	int Init(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
 	State GetState(){ return m_eState; }
 
@@ -80,8 +80,8 @@ private:
 	State m_eState;
 
 	// Game data used for re-connection attempts;
-	std::string m_strHostname;
-	std::string m_strService;
+	std::shared_ptr<std::string> m_strHostname;
+	std::shared_ptr<std::string> m_strService;
 
 	char* m_SendBuffer;
 	char* m_ReadBuffer;

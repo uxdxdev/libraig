@@ -35,7 +35,7 @@ SOFTWARE.
 #include <vector>
 #include <iostream>
 
-#include "base/vector3.h"
+#include "../base/vector3.h"
 
 namespace raig{
 
@@ -53,7 +53,7 @@ public:
 
 	raig_EXPORT RaigClient();
 
-	int raig_EXPORT InitConnection(std::string hostname, std::string service);
+	int raig_EXPORT InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
 	void raig_EXPORT CreateGameWorld(int size, AiService serviceType);
 

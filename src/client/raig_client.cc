@@ -48,7 +48,7 @@ public:
 
 	~RaigClientImpl();
 
-	int InitConnection(std::string hostname, std::string service);
+	int InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
 	void CreateGameWorld(int size, AiService serviceType);
 
@@ -109,8 +109,8 @@ private:
 	std::vector<std::unique_ptr<base::Vector3> > m_vBlockedCells;
 
 	// Game data used for re-connection attempts;
-	std::string m_strHostname;
-	std::string m_strService;
+	std::shared_ptr<std::string> m_strHostname;
+	std::shared_ptr<std::string> m_strService;
 	int m_iGameWorldSize;
 	AiService m_ServiceType;
 };
@@ -123,7 +123,7 @@ raig_EXPORT RaigClient::RaigClient()
 {
 }
 
-int raig_EXPORT RaigClient::InitConnection(std::string hostname, std::string service)
+int raig_EXPORT RaigClient::InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service)
 {
 	return m_Impl->InitConnection(hostname, service);
 }
@@ -176,12 +176,12 @@ RaigClient::RaigClientImpl::~RaigClientImpl()
 	CleanUp();
 }
 
-int RaigClient::RaigClientImpl::InitConnection(std::string hostname, std::string service)
+int RaigClient::RaigClientImpl::InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service)
 {
 	// Store hostname and service for reconnection attempts
 	m_strHostname = hostname;
 	m_strService = service;
-
+	
 	return m_NetManager->Init(m_strHostname, m_strService);
 }
 
