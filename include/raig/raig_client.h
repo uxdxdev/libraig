@@ -30,7 +30,7 @@ SOFTWARE.
 #define RAIG_RAIG_H
 
 #include "export/raig_Export.h"
-
+#include "../../external/libraig/external/libsocket/include/socket.h"
 #include <memory>
 #include <vector>
 #include <iostream>

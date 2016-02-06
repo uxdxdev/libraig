@@ -22,7 +22,7 @@
 #endif
 
 #ifndef RAIG_DEPRECATED
-#  define RAIG_DEPRECATED __declspec(deprecated)
+#  define RAIG_DEPRECATED 
 #endif
 
 #ifndef RAIG_DEPRECATED_EXPORT

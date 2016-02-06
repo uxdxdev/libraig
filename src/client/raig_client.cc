@@ -31,6 +31,8 @@ SOFTWARE.
 #include <algorithm> // std::reverse()
 #include <cstring> // strlen(), strcat(), strtok(), strcpy()
 #include <memory> // unique_ptr<>()
+#include <fstream>
+#include <iostream>
 
 #include "libsocket/include/socket.h" // libsocket
 
@@ -113,6 +115,8 @@ private:
 	std::shared_ptr<std::string> m_strService;
 	int m_iGameWorldSize;
 	AiService m_ServiceType;
+
+	std::fstream LogFile;
 };
 
 /*
@@ -169,6 +173,10 @@ RaigClient::RaigClientImpl::RaigClientImpl()
 	m_iSocketFileDescriptor = -1;
 	m_iRecvSequence = -1; // Start counting from -1
 	m_bIsReqestComplete = true; // Server is ready for first request
+	
+	LogFile.open("Log_file.txt", std::ios::out);
+
+	LogFile << "Init" << std::endl;
 }
 
 RaigClient::RaigClientImpl::~RaigClientImpl()
@@ -385,6 +393,7 @@ void RaigClient::RaigClientImpl::Update()
 
 void RaigClient::RaigClientImpl::CleanUp()
 {
+	LogFile.close();
 	m_vPath.clear();
 	m_vBlockedCells.clear();
 	m_vCompletedPath.clear();
