@@ -115,8 +115,6 @@ private:
 	std::shared_ptr<std::string> m_strService;
 	int m_iGameWorldSize;
 	AiService m_ServiceType;
-
-	std::fstream LogFile;
 };
 
 /*
@@ -172,11 +170,7 @@ RaigClient::RaigClientImpl::RaigClientImpl()
 	m_iGameWorldSize = 0;
 	m_iSocketFileDescriptor = -1;
 	m_iRecvSequence = -1; // Start counting from -1
-	m_bIsReqestComplete = true; // Server is ready for first request
-	
-	LogFile.open("Log_file.txt", std::ios::out);
-
-	LogFile << "Init" << std::endl;
+	m_bIsReqestComplete = true; // Server is ready for first request	
 }
 
 RaigClient::RaigClientImpl::~RaigClientImpl()
@@ -393,7 +387,6 @@ void RaigClient::RaigClientImpl::Update()
 
 void RaigClient::RaigClientImpl::CleanUp()
 {
-	LogFile.close();
 	m_vPath.clear();
 	m_vBlockedCells.clear();
 	m_vCompletedPath.clear();
