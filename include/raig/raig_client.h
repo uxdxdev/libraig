@@ -29,13 +29,14 @@ SOFTWARE.
 #ifndef RAIG_RAIG_H
 #define RAIG_RAIG_H
 
-#include "export/raig_Export.h"
-#include "../../external/libraig/external/libsocket/include/socket.h"
 #include <memory>
 #include <vector>
 #include <iostream>
 
-#include "../base/vector3.h"
+#include "libsocket/include/socket.h"
+
+#include "export/raig_Export.h"
+#include "base/vector3.h"
 
 namespace raig{
 

@@ -52,7 +52,7 @@ if(WIN32)
 endif()
 
 link_directories(
-	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib
+	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib/linux
 	#${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/lib
 )
 add_library(raig SHARED ${SOURCES})
@@ -66,7 +66,6 @@ GENERATE_EXPORT_HEADER(raig
 
 set_target_properties(raig
     PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib"
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/linux"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/lib/linux"
 )

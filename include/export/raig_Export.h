@@ -9,20 +9,20 @@
 #  ifndef raig_EXPORT
 #    ifdef raig_EXPORTS
         /* We are building this library */
-#      define raig_EXPORT __declspec(dllexport)
+#      define raig_EXPORT __attribute__((visibility("default")))
 #    else
         /* We are using this library */
-#      define raig_EXPORT __declspec(dllimport)
+#      define raig_EXPORT __attribute__((visibility("default")))
 #    endif
 #  endif
 
 #  ifndef RAIG_NO_EXPORT
-#    define RAIG_NO_EXPORT 
+#    define RAIG_NO_EXPORT __attribute__((visibility("hidden")))
 #  endif
 #endif
 
 #ifndef RAIG_DEPRECATED
-#  define RAIG_DEPRECATED __declspec(deprecated)
+#  define RAIG_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
 #ifndef RAIG_DEPRECATED_EXPORT
