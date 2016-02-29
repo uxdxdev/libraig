@@ -37,8 +37,9 @@ Event::Event(Type type)
 
 Type Event::GetType()
 {
-	return m_Type;
+
 }
+
 
 Event::~Event()
 {

@@ -52,7 +52,7 @@ public:
 
 	int InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
-	void CreateGameWorld(int size, AiService serviceType);
+	void CreateGameWorld(int width, int height, AiService serviceType);
 
 	void SetCellOpen(base::Vector3 cell);
 
@@ -113,7 +113,8 @@ private:
 	// Game data used for re-connection attempts;
 	std::shared_ptr<std::string> m_strHostname;
 	std::shared_ptr<std::string> m_strService;
-	int m_iGameWorldSize;
+	int m_iGameWorldWidth;
+	int m_iGameWorldHeight;
 	AiService m_ServiceType;
 };
 
@@ -130,9 +131,9 @@ int raig_EXPORT RaigClient::InitConnection(std::shared_ptr<std::string> hostname
 	return m_Impl->InitConnection(hostname, service);
 }
 
-void raig_EXPORT RaigClient::CreateGameWorld(int size, AiService serviceType)
+void raig_EXPORT RaigClient::CreateGameWorld(int width, int height, AiService serviceType)
 {
-	m_Impl->CreateGameWorld(size, serviceType);
+	m_Impl->CreateGameWorld(width, height, serviceType);
 }
 
 void raig_EXPORT RaigClient::SetCellOpen(base::Vector3 cell)
@@ -167,7 +168,8 @@ RaigClient::RaigClientImpl::RaigClientImpl()
 {
 	m_NetManager = std::unique_ptr<net::NetManager>(new net::NetManager());
 	m_ServiceType = AiService::ASTAR; // default AStar
-	m_iGameWorldSize = 0;
+	m_iGameWorldWidth = 0;
+	m_iGameWorldHeight = 0;
 	m_iSocketFileDescriptor = -1;
 	m_iRecvSequence = -1; // Start counting from -1
 	m_bIsReqestComplete = true; // Server is ready for first request	
@@ -187,14 +189,15 @@ int RaigClient::RaigClientImpl::InitConnection(std::shared_ptr<std::string> host
 	return m_NetManager->Init(m_strHostname, m_strService);
 }
 
-void RaigClient::RaigClientImpl::CreateGameWorld(int size, AiService serviceType)
+void RaigClient::RaigClientImpl::CreateGameWorld(int width, int height, AiService serviceType)
 {
 	std::cout << "CreateGameWorld()" << std::endl;
 	// Store initial game world size and service type for re-connection attempts
-	m_iGameWorldSize = size;
+	m_iGameWorldWidth = width;
+	m_iGameWorldHeight = height;
 	m_ServiceType = serviceType;
 
-	sprintf(m_cSendBuffer, "%02d_%03d_%02d_000000000", RaigClientImpl::GAMEWORLD, size, serviceType);
+	sprintf(m_cSendBuffer, "%02d_%03d_%02d_%02d_000000", RaigClientImpl::GAMEWORLD, m_iGameWorldWidth, m_iGameWorldHeight, serviceType);
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -317,7 +320,7 @@ void RaigClient::RaigClientImpl::Update()
 			// Re-connection successful, send RAIG game world size and service
 			// type used initially
 			printf("Re-connection successful\n");
-			CreateGameWorld(m_iGameWorldSize, m_ServiceType);
+			CreateGameWorld(m_iGameWorldWidth, m_iGameWorldHeight, m_ServiceType);
 			ReSendBlockedList();
 			m_bIsReqestComplete = true; // Game client has reconnected to the server, allow first request to be sent
 			return;

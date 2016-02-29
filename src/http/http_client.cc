@@ -30,7 +30,7 @@ SOFTWARE.
 
 #include <sstream>
 
-#include "curl/curl.h"
+//#include "curl/curl.h"
 
 namespace http{
 
@@ -41,6 +41,7 @@ HttpDao::HttpDao()
 
 void HttpDao::Create(std::string username, std::string password)
 {
+	/*
 	CURL *curl;
 	CURLcode res;
 
@@ -52,24 +53,23 @@ void HttpDao::Create(std::string username, std::string password)
 	std::string data = ss.str();
 
 	if(curl) {
-	/* First set the URL that is about to receive our POST. This URL can
-	   just as well be a https:// URL if that is what should receive the
-	   data. */
+	// First set the URL that is about to receive our POST. This URL can just as well be a https:// URL if that is what should receive the data. 
 	curl_easy_setopt(curl, CURLOPT_URL, "https://raig-dashboard.herokuapp.com/api/v1/raig");
-	/* Now specify the POST data */
+	// Now specify the POST data 
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data.c_str());
 
-	/* Perform the request, res will get the return code */
-	res = curl_easy_perform(curl);
-	/* Check for errors */
+	// Perform the request, res will get the return code 
+	// res = curl_easy_perform(curl);
+	// Check for errors 
 	if(res != CURLE_OK)
 	  fprintf(stderr, "curl_easy_perform() failed: %s\n",
 			  curl_easy_strerror(res));
 
-	/* always cleanup */
+	// always cleanup 
 	curl_easy_cleanup(curl);
 	}
 	curl_global_cleanup();
+	*/
 }
 
 void HttpDao::Read()
