@@ -33,9 +33,9 @@ SOFTWARE.
 #include <vector>
 #include <iostream>
 
-#include "libsocket/include/socket.h"
+#include "include/socket.h"
 
-#include "export/raig_Export.h"
+#include "libraig/include/export/raig_Export.h"
 #include "base/vector3.h"
 
 namespace raig{
