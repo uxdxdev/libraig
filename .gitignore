@@ -11,3 +11,15 @@ libraig.*
 .project
 .settings
 *~
+.vs/
+ALL_BUILD.vcxproj
+ALL_BUILD.vcxproj.filters
+ARM/
+Win32/
+ZERO_CHECK.vcxproj
+ZERO_CHECK.vcxproj.filters
+libsocket.vcxproj
+libsocket.vcxproj.filters
+raig.dir/
+raig.vcxproj
+raig.vcxproj.filters
