@@ -1,41 +1,17 @@
-/*
-
-The MIT License (MIT)
-
-Copyright (c) 2016 David Morton
-
-https://github.com/damorton/libraig.git
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-*/
+// Copyright (c) 2016 David Morton
+// Use of this source code is governed by a license that can be
+// found in the LICENSE file.
+// https://github.com/damorton/libraig.git
 
 #include "raig/raig_client.h" // API
 
-extern "C" {
-	#include "../external/libsocket/include/socket.h"
-}
-
 #include <algorithm> // std::reverse()
 #include <cstring> // strlen(), strcat(), strtok(), strcpy()
-#include <memory>
+#include <memory> // unique_ptr<>()
+#include <fstream>
+#include <iostream>
 
+#include "libsocket/include/socket.h" // libsocket
 #include "net/net_manager.h"
 
 namespace raig {
@@ -50,9 +26,9 @@ public:
 
 	~RaigClientImpl();
 
-	int InitConnection(std::string hostname, std::string service);
+	int InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
-	void CreateGameWorld(int size, AiService serviceType);
+	void CreateGameWorld(int width, int height, AiService serviceType);
 
 	void SetCellOpen(base::Vector3 cell);
 
@@ -111,51 +87,52 @@ private:
 	std::vector<std::unique_ptr<base::Vector3> > m_vBlockedCells;
 
 	// Game data used for re-connection attempts;
-	std::string m_strHostname;
-	std::string m_strService;
-	int m_iGameWorldSize;
+	std::shared_ptr<std::string> m_strHostname;
+	std::shared_ptr<std::string> m_strService;
+	int m_iGameWorldWidth;
+	int m_iGameWorldHeight;
 	AiService m_ServiceType;
 };
 
 /*
  *  Raig class implementation
  */
-RaigClient::RaigClient()
+raig_EXPORT RaigClient::RaigClient()
 	: m_Impl(new RaigClientImpl())
 {
 }
 
-int RaigClient::InitConnection(std::string hostname, std::string service)
+int raig_EXPORT RaigClient::InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service)
 {
 	return m_Impl->InitConnection(hostname, service);
 }
 
-void RaigClient::CreateGameWorld(int size, AiService serviceType)
+void raig_EXPORT RaigClient::CreateGameWorld(int width, int height, AiService serviceType)
 {
-	m_Impl->CreateGameWorld(size, serviceType);
+	m_Impl->CreateGameWorld(width, height, serviceType);
 }
 
-void RaigClient::SetCellOpen(base::Vector3 cell)
+void raig_EXPORT RaigClient::SetCellOpen(base::Vector3 cell)
 {
 	m_Impl->SetCellOpen(cell);
 }
 
-void RaigClient::SetCellBlocked(base::Vector3 cell)
+void raig_EXPORT RaigClient::SetCellBlocked(base::Vector3 cell)
 {
 	m_Impl->SetCellBlocked(cell);
 }
 
-void RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
+void raig_EXPORT RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
 {
 	m_Impl->FindPath(start, goal);
 }
 
-std::vector<std::unique_ptr<base::Vector3> > &RaigClient::GetPath()
+std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &RaigClient::GetPath()
 {
 	return m_Impl->GetPath();
 }
 
-void RaigClient::Update()
+void raig_EXPORT RaigClient::Update()
 {
 	m_Impl->Update();
 }
@@ -167,10 +144,11 @@ RaigClient::RaigClientImpl::RaigClientImpl()
 {
 	m_NetManager = std::unique_ptr<net::NetManager>(new net::NetManager());
 	m_ServiceType = AiService::ASTAR; // default AStar
-	m_iGameWorldSize = 0;
+	m_iGameWorldWidth = 0;
+	m_iGameWorldHeight = 0;
 	m_iSocketFileDescriptor = -1;
 	m_iRecvSequence = -1; // Start counting from -1
-	m_bIsReqestComplete = true; // Server is ready for first request
+	m_bIsReqestComplete = true; // Server is ready for first request	
 }
 
 RaigClient::RaigClientImpl::~RaigClientImpl()
@@ -178,23 +156,24 @@ RaigClient::RaigClientImpl::~RaigClientImpl()
 	CleanUp();
 }
 
-int RaigClient::RaigClientImpl::InitConnection(std::string hostname, std::string service)
+int RaigClient::RaigClientImpl::InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service)
 {
 	// Store hostname and service for reconnection attempts
 	m_strHostname = hostname;
 	m_strService = service;
-
+	
 	return m_NetManager->Init(m_strHostname, m_strService);
 }
 
-void RaigClient::RaigClientImpl::CreateGameWorld(int size, AiService serviceType)
+void RaigClient::RaigClientImpl::CreateGameWorld(int width, int height, AiService serviceType)
 {
 	std::cout << "CreateGameWorld()" << std::endl;
 	// Store initial game world size and service type for re-connection attempts
-	m_iGameWorldSize = size;
+	m_iGameWorldWidth = width;
+	m_iGameWorldHeight = height;
 	m_ServiceType = serviceType;
 
-	sprintf(m_cSendBuffer, "%02d_%03d_%02d_000000000", RaigClientImpl::GAMEWORLD, size, serviceType);
+	sprintf_s(m_cSendBuffer, "%02d_%03d_%02d_%02d_000000", RaigClientImpl::GAMEWORLD, m_iGameWorldWidth, m_iGameWorldHeight, serviceType);
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -202,7 +181,7 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 {
 	// Search blocked cells vector and remove the openCell if it was found
 	// Time complexity O(N)
-	for(int i = 0; i <= m_vBlockedCells.size(); i++)
+	for(int i = 0; i <= (int)m_vBlockedCells.size(); i++)
 	{
 		if(!m_vBlockedCells.empty())
 		{
@@ -222,7 +201,7 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 		}
 	}
 
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
+	sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -231,7 +210,7 @@ void RaigClient::RaigClientImpl::SetCellBlocked(base::Vector3 cell)
 	// Add blocked cell to vector
 	m_vBlockedCells.push_back(std::unique_ptr<base::Vector3>(new base::Vector3(cell)));
 
-	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
+	sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -240,11 +219,11 @@ void RaigClient::RaigClientImpl::ReSendBlockedList()
 	if(m_NetManager->GetState() == net::NetManager::CONNECTED)
 	{
 		// Time complexity O(N) to send all cells in vector to RAIG server
-		for(int i = 0; i < m_vBlockedCells.size(); i++)
+		for(int i = 0; i < (int)m_vBlockedCells.size(); i++)
 		{
 			if(!m_vBlockedCells.empty())
 			{
-				sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
+				sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
 				m_NetManager->SendData(m_cSendBuffer);
 			}
 		}
@@ -266,7 +245,7 @@ void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *g
 		// Time complexity O(N)
 		if(!m_vBlockedCells.empty())
 		{
-			for(int i = 0; i < m_vBlockedCells.size(); i++)
+			for(int i = 0; i < (int)m_vBlockedCells.size(); i++)
 			{
 				if(m_vBlockedCells[i]->Compare(start) || m_vBlockedCells[i]->Compare(goal))
 				{
@@ -276,9 +255,12 @@ void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *g
 			}
 		}
 
-		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigClientImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
+		sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigClientImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
 		m_NetManager->SendData(m_cSendBuffer);
 		m_vPath.clear(); // Clear path storage
+
+		// Send message to web application
+		//m_NetManager->GetDao()->Create("raig_client", "true");
 
 		// Path request sent. Set the request complete flag to prevent more requests until this one is complete
 		m_bIsReqestComplete = false;
@@ -292,8 +274,8 @@ std::vector<std::unique_ptr<base::Vector3> > &RaigClient::RaigClientImpl::GetPat
 
 void RaigClient::RaigClientImpl::ClearBuffer()
 {
-	sprintf(m_cSendBuffer, "%d", RaigClientImpl::EMPTY);
-	sprintf(m_cRecvBuffer, "%d", RaigClientImpl::EMPTY);
+	sprintf_s(m_cSendBuffer, "%d", RaigClientImpl::EMPTY);
+	sprintf_s(m_cRecvBuffer, "%d", RaigClientImpl::EMPTY);
 }
 
 void RaigClient::RaigClientImpl::Update()
@@ -314,7 +296,7 @@ void RaigClient::RaigClientImpl::Update()
 			// Re-connection successful, send RAIG game world size and service
 			// type used initially
 			printf("Re-connection successful\n");
-			CreateGameWorld(m_iGameWorldSize, m_ServiceType);
+			CreateGameWorld(m_iGameWorldWidth, m_iGameWorldHeight, m_ServiceType);
 			ReSendBlockedList();
 			m_bIsReqestComplete = true; // Game client has reconnected to the server, allow first request to be sent
 			return;
@@ -387,7 +369,7 @@ void RaigClient::RaigClientImpl::CleanUp()
 	m_vPath.clear();
 	m_vBlockedCells.clear();
 	m_vCompletedPath.clear();
-	close(m_iSocketFileDescriptor);
+	Close(m_iSocketFileDescriptor);
 }
 
 } // namespace raig

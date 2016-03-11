@@ -7,7 +7,9 @@ Client API for R.A.I.G. server application. `libraig` facilitates communication 
 - `cd libraig-master/`
 - Build
 ```
-$ cmake .
+$ mkdir linux-build
+$ cd linux-build
+$ cmake ..
 $ make 
 ```
 - Link against the `libraig` dynamic library in the `lib/` folder. 
