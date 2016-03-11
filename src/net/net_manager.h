@@ -34,6 +34,8 @@ public:
 
 	NetManager();
 
+    // Connects the application to the server at hostname using the port number service.
+    // Uses the Connection() function of the libsocket library.
 	int Init(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
 	State GetState(){ return m_eState; }
@@ -60,6 +62,7 @@ private:
 	std::shared_ptr<std::string> m_strHostname;
 	std::shared_ptr<std::string> m_strService;
 
+    // TODO:: Implement IOBuffers to replace char* buffers
 	char* m_SendBuffer;
 	char* m_ReadBuffer;
 
