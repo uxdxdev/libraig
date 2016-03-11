@@ -2,59 +2,80 @@
 <Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\client\raig_client.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\event.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\vector3.cc">
-      <Filter>Source Files</Filter>
+      <Filter>src\client</Filter>
     </ClCompile>
     <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\io_buffer.cc">
-      <Filter>Source Files</Filter>
+      <Filter>src\base</Filter>
     </ClCompile>
-    <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\net\net_manager.cc">
-      <Filter>Source Files</Filter>
+    <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\event.cc">
+      <Filter>src\base</Filter>
     </ClCompile>
     <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\http\http_client.cc">
-      <Filter>Source Files</Filter>
+      <Filter>src\http</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\net\net_manager.cc">
+      <Filter>src\net</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\vector3.cc">
+      <Filter>src\base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\event.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\observer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src\base\io_buffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\base\vector3.h">
-      <Filter>Header Files</Filter>
+      <Filter>include\base</Filter>
     </ClInclude>
     <ClInclude Include="include\export\raig_Export.h">
-      <Filter>Header Files</Filter>
+      <Filter>include\export</Filter>
     </ClInclude>
     <ClInclude Include="include\raig\raig_client.h">
-      <Filter>Header Files</Filter>
+      <Filter>include\raig</Filter>
     </ClInclude>
-    <ClInclude Include="src\http\http_client.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="src\base\io_buffer.h">
+      <Filter>src\base</Filter>
     </ClInclude>
     <ClInclude Include="src\net\net_manager.h">
-      <Filter>Header Files</Filter>
+      <Filter>src\net</Filter>
+    </ClInclude>
+    <ClInclude Include="src\base\observer.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\src\base\event.h">
+      <Filter>src\base</Filter>
+    </ClInclude>
+    <ClInclude Include="src\http\http_client.h">
+      <Filter>src\http</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="C:\projects\cocos2dx\shipwreck\cocos2d\external\libraig\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Source Files">
+    <Filter Include="include">
+      <UniqueIdentifier>{6C394736-DE01-36D6-AF78-67CB5F4E8A52}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\base">
+      <UniqueIdentifier>{dbf0e0a4-ad59-4d73-bd61-b076e7960b88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\export">
+      <UniqueIdentifier>{831f0722-c4d6-4bd0-83e4-19285bb2a4d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\raig">
+      <UniqueIdentifier>{5706cc93-dbf3-488c-9e8e-2f8bc7393a67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
       <UniqueIdentifier>{8E4DC5BC-91E8-3DFB-AA57-56EFED8D73A1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{6C394736-DE01-36D6-AF78-67CB5F4E8A52}</UniqueIdentifier>
+    <Filter Include="src\base">
+      <UniqueIdentifier>{be6f3314-a108-4119-86d8-4a2319dfcd4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\http">
+      <UniqueIdentifier>{58ca70ec-d3a2-40bb-93c1-3b46b670f056}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\net">
+      <UniqueIdentifier>{55f8fed9-394c-4984-a5b2-3caf310161f7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\client">
+      <UniqueIdentifier>{4f260361-59b5-419f-9fd5-a5fae128ddf2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
