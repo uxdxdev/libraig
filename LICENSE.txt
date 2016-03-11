@@ -1,10 +1,6 @@
-/*
-
 The MIT License (MIT)
 
 Copyright (c) 2016 David Morton
-
-https://github.com/damorton/libraig.git
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,30 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-*/
-
-#ifndef BASE_VECTOR3_H_
-#define BASE_VECTOR3_H_
-
-#include "export/raig_Export.h"
-
-namespace base{
-
-class Vector3{
-public:
-	int m_iX;
-	int m_iY;
-	int m_iZ;
-	int m_iId;
-
-	raig_EXPORT Vector3();
-	raig_EXPORT ~Vector3();
-	raig_EXPORT Vector3(int x, int y, int z);
-	raig_EXPORT Vector3(int id, int x, int y, int z);
-	int raig_EXPORT Compare(const Vector3 *other);
-};
-
-} // namespace base
-
-#endif
