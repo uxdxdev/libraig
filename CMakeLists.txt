@@ -37,10 +37,22 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/src	
 )
 set(SOURCES 
-	src/client/raig_client.cc 
+    include/export/raig_Export.h
+    include/raig/raig_client.h
+    include/vector3.h
+    src/base/event.h 	
+    src/base/io_buffer.h 	
+    src/base/node.h 	
+    src/base/observer.h 	
+    src/http/http_client.h
+    src/net/net_manager.h
+    
+    src/client/raig_client.cc    
+	src/base/event.cc	
 	src/base/vector3.cc 
+	src/base/io_buffer.cc 
 	src/net/net_manager.cc
-	#src/http/http_client.cc
+	src/http/http_client.cc
 )
 
 if(CMAKE_COMPILER_IS_GNUCXX)
