@@ -9,6 +9,7 @@
 #include <cstring> // strlen(), strcat(), strtok(), strcpy()
 #include <memory> // unique_ptr<>()
 #include <fstream>
+#include <sstream>
 #include <iostream>
 
 #include "libsocket/include/socket.h" // libsocket
@@ -44,6 +45,8 @@ public:
 
 	// Update the raig engine
 	void Update();
+
+	void WriteToLogFile(const char *message);
 
 private:
 	enum State{
@@ -92,6 +95,7 @@ private:
 	int m_iGameWorldWidth;
 	int m_iGameWorldHeight;
 	AiService m_ServiceType;
+	
 };
 
 /*
@@ -173,35 +177,53 @@ void RaigClient::RaigClientImpl::CreateGameWorld(int width, int height, AiServic
 	m_iGameWorldHeight = height;
 	m_ServiceType = serviceType;
 
-	sprintf_s(m_cSendBuffer, "%02d_%03d_%02d_%02d_000000", RaigClientImpl::GAMEWORLD, m_iGameWorldWidth, m_iGameWorldHeight, serviceType);
+	sprintf(m_cSendBuffer, "%02d_%03d_%02d_%02d_000000", RaigClientImpl::GAMEWORLD, m_iGameWorldWidth, m_iGameWorldHeight, serviceType);
 	m_NetManager->SendData(m_cSendBuffer);
 }
+
 
 void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 {
 	// Search blocked cells vector and remove the openCell if it was found
-	// Time complexity O(N)
+	// Time complexity O(N)	
+	std::stringstream message;
+
+	message << "SetCellOpen() with X: " << openCell.m_iX << " Z:" << openCell.m_iZ << "\nBlocked list size " << m_vBlockedCells.size() << std::endl;
+	WriteToLogFile(message.str().c_str());
+	message.str("");
 	for(int i = 0; i <= (int)m_vBlockedCells.size(); i++)
 	{
 		if(!m_vBlockedCells.empty())
 		{
 			if(m_vBlockedCells[i]->Compare(&openCell))
-			{
-				//printf("Cell X:%d Z:%d == Cell X:%d Z:%d\n", m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iZ, openCell.m_iX, openCell.m_iZ);
+			{				
+				message << "Cell found in blocked list with X: " << m_vBlockedCells[i]->m_iX << " Z:" << m_vBlockedCells[i]->m_iZ << std::endl;
+				WriteToLogFile(message.str().c_str());
+				message.str("");
 				m_vBlockedCells.erase(m_vBlockedCells.begin() + i);
 				if(m_vBlockedCells.empty())
 				{
-					//printf("Blocked cells list empty\n");
+					WriteToLogFile("Blocked cells list empty after erase\n");
 				}
+
+				WriteToLogFile("Cell removed\n");
+				break;
 			}
 		}
 		else
 		{
-			//printf("Blocked cells list empty\n");
+			WriteToLogFile("Blocked cells list empty\n");
 		}
 	}
 
-	sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
+	message << "Blocked list size " << m_vBlockedCells.size() << std::endl;
+	WriteToLogFile(message.str().c_str());
+	message.str("");
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
+		
+	message << "Sending buffer data : " << m_cSendBuffer << std::endl;
+	WriteToLogFile(message.str().c_str());
+	message.str("");
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -210,7 +232,17 @@ void RaigClient::RaigClientImpl::SetCellBlocked(base::Vector3 cell)
 	// Add blocked cell to vector
 	m_vBlockedCells.push_back(std::unique_ptr<base::Vector3>(new base::Vector3(cell)));
 
-	sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
+	std::stringstream message;
+
+	message << "SetCellBlocked() Cell with X: " << cell.m_iX << " Z:" << cell.m_iZ << std::endl;
+	WriteToLogFile(message.str().c_str());
+	message.str("");
+
+	message << "Blocked list size " << m_vBlockedCells.size() << std::endl;
+	WriteToLogFile(message.str().c_str());
+	message.str("");
+
+	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -223,7 +255,7 @@ void RaigClient::RaigClientImpl::ReSendBlockedList()
 		{
 			if(!m_vBlockedCells.empty())
 			{
-				sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
+				sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
 				m_NetManager->SendData(m_cSendBuffer);
 			}
 		}
@@ -255,7 +287,7 @@ void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *g
 			}
 		}
 
-		sprintf_s(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigClientImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
+		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigClientImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
 		m_NetManager->SendData(m_cSendBuffer);
 		m_vPath.clear(); // Clear path storage
 
@@ -274,8 +306,8 @@ std::vector<std::unique_ptr<base::Vector3> > &RaigClient::RaigClientImpl::GetPat
 
 void RaigClient::RaigClientImpl::ClearBuffer()
 {
-	sprintf_s(m_cSendBuffer, "%d", RaigClientImpl::EMPTY);
-	sprintf_s(m_cRecvBuffer, "%d", RaigClientImpl::EMPTY);
+	sprintf(m_cSendBuffer, "%d", RaigClientImpl::EMPTY);
+	sprintf(m_cRecvBuffer, "%d", RaigClientImpl::EMPTY);
 }
 
 void RaigClient::RaigClientImpl::Update()
@@ -370,6 +402,13 @@ void RaigClient::RaigClientImpl::CleanUp()
 	m_vBlockedCells.clear();
 	m_vCompletedPath.clear();
 	Close(m_iSocketFileDescriptor);
+}
+
+void RaigClient::RaigClientImpl::WriteToLogFile(const char *message)
+{
+	FILE *logfile = fopen("raigLogfile.txt", "a");
+	fprintf(logfile, "%s", message);
+	fclose(logfile);
 }
 
 } // namespace raig

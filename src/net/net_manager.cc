@@ -54,7 +54,6 @@ int NetManager::SendData(char* buffer)
 	int bytesSents = 0;
 
 	bytesSents = Send(m_iSocketFileDescriptor, buffer, size, flags);
-
 	return bytesSents;
 }
 
