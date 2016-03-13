@@ -189,7 +189,7 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 	std::stringstream message;
 
 	message << "SetCellOpen() with X: " << openCell.m_iX << " Z:" << openCell.m_iZ << "\nBlocked list size " << m_vBlockedCells.size() << std::endl;
-	WriteToLogFile(message.str().c_str());
+	//WriteToLogFile(message.str().c_str());
 	message.str("");
 	for(int i = 0; i <= (int)m_vBlockedCells.size(); i++)
 	{
@@ -198,15 +198,15 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 			if(m_vBlockedCells[i]->Compare(&openCell))
 			{				
 				message << "Cell found in blocked list with X: " << m_vBlockedCells[i]->m_iX << " Z:" << m_vBlockedCells[i]->m_iZ << std::endl;
-				WriteToLogFile(message.str().c_str());
+				//WriteToLogFile(message.str().c_str());
 				message.str("");
 				m_vBlockedCells.erase(m_vBlockedCells.begin() + i);
 				if(m_vBlockedCells.empty())
 				{
-					WriteToLogFile("Blocked cells list empty after erase\n");
+					//WriteToLogFile("Blocked cells list empty after erase\n");
 				}
 
-				WriteToLogFile("Cell removed\n");
+				//WriteToLogFile("Cell removed\n");
 				break;
 			}
 		}
@@ -217,12 +217,12 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 	}
 
 	message << "Blocked list size " << m_vBlockedCells.size() << std::endl;
-	WriteToLogFile(message.str().c_str());
+	//WriteToLogFile(message.str().c_str());
 	message.str("");
 	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
 		
 	message << "Sending buffer data : " << m_cSendBuffer << std::endl;
-	WriteToLogFile(message.str().c_str());
+	//WriteToLogFile(message.str().c_str());
 	message.str("");
 	m_NetManager->SendData(m_cSendBuffer);
 }
@@ -235,11 +235,11 @@ void RaigClient::RaigClientImpl::SetCellBlocked(base::Vector3 cell)
 	std::stringstream message;
 
 	message << "SetCellBlocked() Cell with X: " << cell.m_iX << " Z:" << cell.m_iZ << std::endl;
-	WriteToLogFile(message.str().c_str());
+	//WriteToLogFile(message.str().c_str());
 	message.str("");
 
 	message << "Blocked list size " << m_vBlockedCells.size() << std::endl;
-	WriteToLogFile(message.str().c_str());
+	//WriteToLogFile(message.str().c_str());
 	message.str("");
 
 	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
