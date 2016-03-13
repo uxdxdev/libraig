@@ -36,7 +36,7 @@ public:
 
 	void raig_EXPORT SetCellBlocked(base::Vector3 cell);
 
-	void raig_EXPORT FindPath(base::Vector3 *start, base::Vector3 *goal);
+	int raig_EXPORT FindPath(base::Vector3 *start, base::Vector3 *goal);
 
 	std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &GetPath();
 

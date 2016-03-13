@@ -38,7 +38,7 @@ public:
 	void ReSendBlockedList();
 
 	// Find a path using A* from source to destination
-	void FindPath(base::Vector3 *start, base::Vector3 *goal);
+	int FindPath(base::Vector3 *start, base::Vector3 *goal);
 
 	// Read the path data received by the server
 	std::vector<std::unique_ptr<base::Vector3> > &GetPath();
@@ -126,9 +126,9 @@ void raig_EXPORT RaigClient::SetCellBlocked(base::Vector3 cell)
 	m_Impl->SetCellBlocked(cell);
 }
 
-void raig_EXPORT RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
+int raig_EXPORT RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
 {
-	m_Impl->FindPath(start, goal);
+	return m_Impl->FindPath(start, goal);
 }
 
 std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &RaigClient::GetPath()
@@ -262,18 +262,19 @@ void RaigClient::RaigClientImpl::ReSendBlockedList()
 	}
 }
 
-void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *goal)
+int RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *goal)
 {
 	if(m_NetManager->GetState() == net::NetManager::CONNECTED)
 	{
 		if(m_bIsReqestComplete == false)
 		{
 			// Connected but the server is busy processing a request
-			// client must wait before sending another request
-			return;
+			// client must wait before sending another request.
+			// Return -1 for find path fail
+			return -1;
 		}
 
-		// Check if the start of goal cell is a blocked cell
+		// Check if the start or goal cell is a blocked cell
 		// Time complexity O(N)
 		if(!m_vBlockedCells.empty())
 		{
@@ -282,7 +283,8 @@ void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *g
 				if(m_vBlockedCells[i]->Compare(start) || m_vBlockedCells[i]->Compare(goal))
 				{
 					//printf("Invalid path, start or end goal is blocked\n");
-					return;
+					// Return -1 for find path fail. Cannot find path from start to start, or goal to goal, thats silly.
+					return -1;
 				}
 			}
 		}
@@ -296,7 +298,14 @@ void RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *g
 
 		// Path request sent. Set the request complete flag to prevent more requests until this one is complete
 		m_bIsReqestComplete = false;
+
+		// Success we have found a suitable path request for the server. 
+		// Return 1 on successful request
+		return 1;
 	}
+
+	// Return 0 for not connected
+	return 0;
 }
 
 std::vector<std::unique_ptr<base::Vector3> > &RaigClient::RaigClientImpl::GetPath()
