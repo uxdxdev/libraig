@@ -39,7 +39,7 @@ include_directories(
 set(SOURCES 
     include/export/raig_Export.h
     include/raig/raig_client.h
-    include/vector3.h
+    include/base/vector3.h
     src/base/event.h 	
     src/base/io_buffer.h 	
     src/base/node.h 	
