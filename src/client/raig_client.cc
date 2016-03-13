@@ -31,6 +31,8 @@ public:
 
 	void CreateGameWorld(int width, int height, AiService serviceType);
 
+	void ResetGameWorld();
+
 	void SetCellOpen(base::Vector3 cell);
 
 	void SetCellBlocked(base::Vector3 cell);
@@ -106,6 +108,10 @@ raig_EXPORT RaigClient::RaigClient()
 {
 }
 
+raig_EXPORT RaigClient::~RaigClient()	
+{
+}
+
 int raig_EXPORT RaigClient::InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service)
 {
 	return m_Impl->InitConnection(hostname, service);
@@ -114,6 +120,11 @@ int raig_EXPORT RaigClient::InitConnection(std::shared_ptr<std::string> hostname
 void raig_EXPORT RaigClient::CreateGameWorld(int width, int height, AiService serviceType)
 {
 	m_Impl->CreateGameWorld(width, height, serviceType);
+}
+
+void raig_EXPORT RaigClient::ResetGameWorld()
+{
+	m_Impl->ResetGameWorld();
 }
 
 void raig_EXPORT RaigClient::SetCellOpen(base::Vector3 cell)
@@ -179,6 +190,19 @@ void RaigClient::RaigClientImpl::CreateGameWorld(int width, int height, AiServic
 
 	sprintf(m_cSendBuffer, "%02d_%03d_%02d_%02d_000000", RaigClientImpl::GAMEWORLD, m_iGameWorldWidth, m_iGameWorldHeight, serviceType);
 	m_NetManager->SendData(m_cSendBuffer);
+}
+
+void RaigClient::RaigClientImpl::ResetGameWorld()
+{
+	for (int i = 0; i <= (int)m_vBlockedCells.size(); i++)
+	{
+		if (!m_vBlockedCells.empty())
+		{
+			sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
+			m_NetManager->SendData(m_cSendBuffer);		
+		}		
+	}
+	m_vBlockedCells.clear();
 }
 
 

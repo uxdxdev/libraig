@@ -28,9 +28,13 @@ public:
 
 	raig_EXPORT RaigClient();
 
+	raig_EXPORT ~RaigClient();
+
 	int raig_EXPORT InitConnection(std::shared_ptr<std::string> hostname, std::shared_ptr<std::string> service);
 
 	void raig_EXPORT CreateGameWorld(int width, int height, AiService serviceType);
+
+	void raig_EXPORT ResetGameWorld();
 
 	void raig_EXPORT SetCellOpen(base::Vector3 cell);
 
