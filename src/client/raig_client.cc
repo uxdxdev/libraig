@@ -198,11 +198,9 @@ void RaigClient::RaigClientImpl::ResetGameWorld()
 	{
 		if (!m_vBlockedCells.empty())
 		{
-			sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
-			m_NetManager->SendData(m_cSendBuffer);		
+			SetCellOpen(base::Vector3(m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ));			
 		}		
-	}
-	m_vBlockedCells.clear();
+	}	
 }
 
 
