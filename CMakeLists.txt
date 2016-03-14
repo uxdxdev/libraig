@@ -65,6 +65,7 @@ endif()
 
 link_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib/linux
+	${CMAKE_CURRENT_SOURCE_DIR}/external/libsocket/lib/win32
 	#${CMAKE_CURRENT_SOURCE_DIR}/external/libcurl/lib
 )
 add_library(raig SHARED ${SOURCES})
