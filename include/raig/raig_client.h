@@ -42,7 +42,7 @@ public:
 
 	int raig_EXPORT FindPath(base::Vector3 *start, base::Vector3 *goal);
 
-	std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &GetPath();
+	std::vector<std::shared_ptr<base::Vector3> > raig_EXPORT &GetPath();
 
 	void raig_EXPORT Update();
 

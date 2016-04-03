@@ -43,7 +43,7 @@ public:
 	int FindPath(base::Vector3 *start, base::Vector3 *goal);
 
 	// Read the path data received by the server
-	std::vector<std::unique_ptr<base::Vector3> > &GetPath();
+	std::vector<std::shared_ptr<base::Vector3> > &GetPath();
 
 	// Update the raig engine
 	void Update();
@@ -82,12 +82,13 @@ private:
 	char m_cRecvBuffer[MAX_BUFFER_SIZE];
 
 	// vector of locations
-	std::vector<std::unique_ptr<base::Vector3> > m_vPath;
-	std::vector<std::unique_ptr<base::Vector3> > m_vCompletedPath;
+	std::vector<std::shared_ptr<base::Vector3> > m_vPath;
+	std::vector<std::shared_ptr<base::Vector3> > m_vCompletedPath;
 
 	int m_iRecvSequence;
 
 	bool m_bIsReqestComplete;
+	bool m_bPathReady;
 
 	std::vector<std::unique_ptr<base::Vector3> > m_vBlockedCells;
 
@@ -96,8 +97,7 @@ private:
 	std::shared_ptr<std::string> m_strService;
 	int m_iGameWorldWidth;
 	int m_iGameWorldHeight;
-	AiService m_ServiceType;
-	
+	AiService m_ServiceType;	
 };
 
 /*
@@ -142,7 +142,7 @@ int raig_EXPORT RaigClient::FindPath(base::Vector3 *start, base::Vector3 *goal)
 	return m_Impl->FindPath(start, goal);
 }
 
-std::vector<std::unique_ptr<base::Vector3> > raig_EXPORT &RaigClient::GetPath()
+std::vector<std::shared_ptr<base::Vector3> > raig_EXPORT &RaigClient::GetPath()
 {
 	return m_Impl->GetPath();
 }
@@ -164,6 +164,7 @@ RaigClient::RaigClientImpl::RaigClientImpl()
 	m_iSocketFileDescriptor = -1;
 	m_iRecvSequence = -1; // Start counting from -1
 	m_bIsReqestComplete = true; // Server is ready for first request	
+	m_bPathReady = false;
 }
 
 RaigClient::RaigClientImpl::~RaigClientImpl()
@@ -194,13 +195,16 @@ void RaigClient::RaigClientImpl::CreateGameWorld(int width, int height, AiServic
 
 void RaigClient::RaigClientImpl::ResetGameWorld()
 {
-	for (int i = 0; i <= (int)m_vBlockedCells.size(); i++)
+	int size = (int)m_vBlockedCells.size();
+	for (int i = 0; i < size; i++)
 	{
 		if (!m_vBlockedCells.empty())
 		{
-			SetCellOpen(base::Vector3(m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ));			
+			sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, m_vBlockedCells[i]->m_iX, m_vBlockedCells[i]->m_iY, m_vBlockedCells[i]->m_iZ);
+			m_NetManager->SendData(m_cSendBuffer);
 		}		
 	}	
+	m_vBlockedCells.clear();
 }
 
 
@@ -225,16 +229,16 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 				m_vBlockedCells.erase(m_vBlockedCells.begin() + i);
 				if(m_vBlockedCells.empty())
 				{
-					//WriteToLogFile("Blocked cells list empty after erase\n");
+					//WriteToLogFile("Blocked cells list empty after erase\n");					
 				}
 
-				//WriteToLogFile("Cell removed\n");
+				//WriteToLogFile("Cell removed\n");			
 				break;
 			}
 		}
 		else
 		{
-			WriteToLogFile("Blocked cells list empty\n");
+			//WriteToLogFile("Blocked cells list empty\n");			
 		}
 	}
 
@@ -330,7 +334,7 @@ int RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *go
 	return 0;
 }
 
-std::vector<std::unique_ptr<base::Vector3> > &RaigClient::RaigClientImpl::GetPath()
+std::vector<std::shared_ptr<base::Vector3> > &RaigClient::RaigClientImpl::GetPath()
 {
 	return m_vCompletedPath;
 }
@@ -403,7 +407,7 @@ void RaigClient::RaigClientImpl::Update()
 			m_iRecvSequence = locationId;
 
 			// Add vector to the path
-			m_vPath.push_back(std::unique_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
+			m_vPath.push_back(std::shared_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
 			ClearBuffer();
 		}
 		else if(statusCode == RaigClientImpl::END)
@@ -418,9 +422,9 @@ void RaigClient::RaigClientImpl::Update()
 			int locationZ = std::atoi(nodeZ);
 
 			// Add vector to the path
-			m_vPath.push_back(std::unique_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
+			m_vPath.push_back(std::shared_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
 			std::reverse(m_vPath.begin(), m_vPath.end()); // Reverse path before client game uses it
-			m_vCompletedPath = std::move(m_vPath);
+			m_vCompletedPath = m_vPath;
 			m_bIsReqestComplete = true; // Received an END packet, allow more requests
 			ClearBuffer();
 		}
