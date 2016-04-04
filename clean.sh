@@ -1,1 +1,1 @@
-rm -rf CMakeCache.txt CMakeFiles
+rm -rf CMakeCache.txt CMakeFiles Debug raig.dir Win32

@@ -443,8 +443,8 @@ void RaigClient::RaigClientImpl::Update()
 			std::stringstream message;
 			//message << "Time taken for pathfinding request to return in milliseconds: " << duration << std::endl;
 
-			// CSV milliseconds,seconds
-			message << ms << "," << (ms / 1000) << std::endl;
+			// CSV milliseconds, path size
+			message << ms << "," << m_vCompletedPath.size() << std::endl;
 
 			WriteToLogFile(message);			
 		}
