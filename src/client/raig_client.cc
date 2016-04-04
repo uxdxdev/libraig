@@ -461,17 +461,25 @@ void RaigClient::RaigClientImpl::CleanUp()
 
 void RaigClient::RaigClientImpl::WriteToLogFile(const char *message)
 {
+	// Cannot create file inside apk on android, crashes the app
+	// Only use logfile on windows for now.
+#ifdef _WIN32
 	FILE *logfile = fopen("libraiglog.txt", "a");
 	fprintf(logfile, "%s", message);
 	fclose(logfile);
+#endif
 }
 
 void RaigClient::RaigClientImpl::WriteToLogFile(std::stringstream &message)
 {
+	// Cannot create file inside apk on android, crashes the app
+	// Only use logfile on windows for now.
+#ifdef _WIN32
 	FILE *logfile = fopen("libraiglog.txt", "a");
 	fprintf(logfile, "%s", message.str().c_str());
 	message.str("");
 	fclose(logfile);
+#endif
 }
 
 } // namespace raig
