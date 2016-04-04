@@ -9,7 +9,12 @@
 #include <memory>
 #include <vector>
 
-#include "export/raig_Export.h"
+
+#ifdef _WIN32
+#include "export/windows/raig_Export.h"
+#else
+#include "export/linux/raig_Export.h"
+#endif
 #include "base/vector3.h"
 
 namespace raig{

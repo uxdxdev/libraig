@@ -6,8 +6,11 @@
 #ifndef BASE_VECTOR3_H_
 #define BASE_VECTOR3_H_
 
-#include "export/raig_Export.h"
-
+#ifdef _WIN32
+#include "export/windows/raig_Export.h"
+#else
+#include "export/linux/raig_Export.h"
+#endif
 namespace base{
 
 class Vector3{
