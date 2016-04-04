@@ -15,6 +15,8 @@
 #include "libsocket/include/socket.h" // libsocket
 #include "net/net_manager.h"
 
+#include <chrono> 
+
 namespace raig {
 
 #define MAX_BUFFER_SIZE 13
@@ -47,9 +49,7 @@ public:
 
 	// Update the raig engine
 	void Update();
-
-	void WriteToLogFile(const char *message);
-
+	
 private:
 	enum State{
 		CONNECTED,
@@ -98,6 +98,12 @@ private:
 	int m_iGameWorldWidth;
 	int m_iGameWorldHeight;
 	AiService m_ServiceType;	
+
+	std::chrono::high_resolution_clock::time_point startTime;
+	std::chrono::high_resolution_clock::time_point endTime;
+
+	void WriteToLogFile(const char *message);
+	void WriteToLogFile(std::stringstream &message);
 };
 
 /*
@@ -215,8 +221,8 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 	std::stringstream message;
 
 	message << "SetCellOpen() with X: " << openCell.m_iX << " Z:" << openCell.m_iZ << "\nBlocked list size " << m_vBlockedCells.size() << std::endl;
-	//WriteToLogFile(message.str().c_str());
-	message.str("");
+	//WriteToLogFile(message);
+
 	for(int i = 0; i <= (int)m_vBlockedCells.size(); i++)
 	{
 		if(!m_vBlockedCells.empty())
@@ -224,8 +230,8 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 			if(m_vBlockedCells[i]->Compare(&openCell))
 			{				
 				message << "Cell found in blocked list with X: " << m_vBlockedCells[i]->m_iX << " Z:" << m_vBlockedCells[i]->m_iZ << std::endl;
-				//WriteToLogFile(message.str().c_str());
-				message.str("");
+				//WriteToLogFile(message);
+
 				m_vBlockedCells.erase(m_vBlockedCells.begin() + i);
 				if(m_vBlockedCells.empty())
 				{
@@ -243,13 +249,13 @@ void RaigClient::RaigClientImpl::SetCellOpen(base::Vector3 openCell)
 	}
 
 	message << "Blocked list size " << m_vBlockedCells.size() << std::endl;
-	//WriteToLogFile(message.str().c_str());
-	message.str("");
+	//WriteToLogFile(message);
+	
 	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_OPEN, openCell.m_iX, openCell.m_iY, openCell.m_iZ);
 		
 	message << "Sending buffer data : " << m_cSendBuffer << std::endl;
-	//WriteToLogFile(message.str().c_str());
-	message.str("");
+	//WriteToLogFile(message);
+
 	m_NetManager->SendData(m_cSendBuffer);
 }
 
@@ -261,12 +267,10 @@ void RaigClient::RaigClientImpl::SetCellBlocked(base::Vector3 cell)
 	std::stringstream message;
 
 	message << "SetCellBlocked() Cell with X: " << cell.m_iX << " Z:" << cell.m_iZ << std::endl;
-	//WriteToLogFile(message.str().c_str());
-	message.str("");
+	//WriteToLogFile(message);
 
 	message << "Blocked list size " << m_vBlockedCells.size() << std::endl;
-	//WriteToLogFile(message.str().c_str());
-	message.str("");
+	//WriteToLogFile(message);
 
 	sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_0000000", RaigClientImpl::CELL_BLOCKED, cell.m_iX, cell.m_iY, cell.m_iZ);
 	m_NetManager->SendData(m_cSendBuffer);
@@ -318,6 +322,10 @@ int RaigClient::RaigClientImpl::FindPath(base::Vector3 *start, base::Vector3 *go
 		sprintf(m_cSendBuffer, "%02d_%02d_%02d_%02d_%02d_0000", RaigClientImpl::PATH, start->m_iX, start->m_iZ, goal->m_iX, goal->m_iZ);
 		m_NetManager->SendData(m_cSendBuffer);
 		m_vPath.clear(); // Clear path storage
+
+		// Start timer
+		startTime = std::chrono::high_resolution_clock::now();
+		//WriteToLogFile("Find path request sent to server. Timer started\n");
 
 		// Send message to web application
 		//m_NetManager->GetDao()->Create("raig_client", "true");
@@ -427,6 +435,18 @@ void RaigClient::RaigClientImpl::Update()
 			m_vCompletedPath = m_vPath;
 			m_bIsReqestComplete = true; // Received an END packet, allow more requests
 			ClearBuffer();
+
+			// Stop timer and write results to logfile
+			//WriteToLogFile("END packet recieved from server\n");
+			endTime = std::chrono::high_resolution_clock::now();
+			long long ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
+			std::stringstream message;
+			//message << "Time taken for pathfinding request to return in milliseconds: " << duration << std::endl;
+
+			// CSV milliseconds,seconds
+			message << ms << "," << (ms / 1000) << std::endl;
+
+			WriteToLogFile(message);			
 		}
 	}
 }
@@ -441,8 +461,16 @@ void RaigClient::RaigClientImpl::CleanUp()
 
 void RaigClient::RaigClientImpl::WriteToLogFile(const char *message)
 {
-	FILE *logfile = fopen("raigLogfile.txt", "a");
+	FILE *logfile = fopen("libraiglog.txt", "a");
 	fprintf(logfile, "%s", message);
+	fclose(logfile);
+}
+
+void RaigClient::RaigClientImpl::WriteToLogFile(std::stringstream &message)
+{
+	FILE *logfile = fopen("libraiglog.txt", "a");
+	fprintf(logfile, "%s", message.str().c_str());
+	message.str("");
 	fclose(logfile);
 }
 
