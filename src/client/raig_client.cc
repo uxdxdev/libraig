@@ -1,7 +1,6 @@
 // Copyright (c) 2016 David Morton
 // Use of this source code is governed by a license that can be
 // found in the LICENSE file.
-// https://github.com/damorton/libraig.git
 
 #include "raig/raig_client.h" // API
 
@@ -431,7 +430,7 @@ void RaigClient::RaigClientImpl::Update()
 
 			// Add vector to the path
 			m_vPath.push_back(std::shared_ptr<base::Vector3>(new base::Vector3(locationId, locationX, 0, locationZ)));
-			std::reverse(m_vPath.begin(), m_vPath.end()); // Reverse path before client game uses it
+			std::reverse(m_vPath.begin(), m_vPath.end()); // Reverse path before client game uses it			
 			m_vCompletedPath = m_vPath;
 			m_bIsReqestComplete = true; // Received an END packet, allow more requests
 			ClearBuffer();
